@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+#include <GL/glew.h>   // must be included before GLFW
 #include <GLFW/glfw3.h>
 
 #include <cstdlib>
@@ -15,28 +15,33 @@ int main() {
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
     GLFWwindow* window = glfwCreateWindow(1280, 720, "my-engine", nullptr, nullptr);
     if (!window) {
-        std::cerr << "Failed to create GLFW window\n";
+        std::cerr << "Failed to create GLFW window (is OpenGL 4.6 supported?)\n";
         glfwTerminate();
         return EXIT_FAILURE;
     }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-        std::cerr << "Failed to load OpenGL functions\n";
+    // Needed with core profiles so GLEW loads every available function.
+    glewExperimental = GL_TRUE;
+    GLenum glewStatus = glewInit();
+    if (glewStatus != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW: " << glewGetErrorString(glewStatus) << '\n';
         glfwDestroyWindow(window);
         glfwTerminate();
         return EXIT_FAILURE;
     }
+    // glewInit can leave a harmless GL_INVALID_ENUM on core profiles; clear it.
+    while (glGetError() != GL_NO_ERROR) {}
 
     std::cout << "OpenGL " << glGetString(GL_VERSION) << '\n'
-              << "Renderer: " << glGetString(GL_RENDERER) << '\n';
+              << "Renderer: " << glGetString(GL_RENDERER) << '\n'
+              << "GLEW " << glewGetString(GLEW_VERSION) << '\n';
 
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);

@@ -1,0 +1,52 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": { "major": 3, "minor": 20, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "ninja-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "architecture": { "value": "x64", "strategy": "external" },
+      "toolset": { "value": "host=x64", "strategy": "external" },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug (MSVC, Ninja)",
+      "description": "Default for VS Code and Visual Studio 'Open Folder'.",
+      "inherits": "ninja-base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "release",
+      "displayName": "Release (MSVC, Ninja)",
+      "inherits": "ninja-base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "vs2026",
+      "displayName": "Visual Studio 2026 solution (.slnx)",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/vs2026"
+    },
+    {
+      "name": "vs2022",
+      "displayName": "Visual Studio 2022 solution (.sln)",
+      "description": "For graders/teammates on VS 2022. Needs VS 2022 installed.",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/vs2022"
+    }
+  ],
+  "buildPresets": [
+    { "name": "debug", "configurePreset": "debug" },
+    { "name": "release", "configurePreset": "release" },
+    { "name": "vs2026-debug", "configurePreset": "vs2026", "configuration": "Debug" },
+    { "name": "vs2022-debug", "configurePreset": "vs2022", "configuration": "Debug" }
+  ]
+}

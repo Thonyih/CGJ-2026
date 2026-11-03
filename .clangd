@@ -1,0 +1,4 @@
+# clangd reads the compile database produced by the "debug" CMake preset,
+# which includes the paths to the downloaded GLEW, GLFW and GLM headers.
+CompileFlags:
+  CompilationDatabase: build/debug
