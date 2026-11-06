@@ -22,11 +22,12 @@ GLuint vertexBuffer = 0;   // VBO: holds the vertices on the graphics card
 
 // ---------------------------------------------------------------------------
 // Shaders: tiny programs that run on the graphics card.
+// Written for GLSL 3.30 (OpenGL 3.3) so they also work on PCs without OpenGL 4.6.
 // The vertex shader places each vertex on screen (multiplying by the camera
 // matrix); the fragment shader colours the pixels.
 // ---------------------------------------------------------------------------
 const char* vertexShaderSource = R"(
-#version 460 core
+#version 330 core
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 uniform mat4 viewProjection;
@@ -39,7 +40,7 @@ void main()
 )";
 
 const char* fragmentShaderSource = R"(
-#version 460 core
+#version 330 core
 in vec3 color;
 out vec4 outColor;
 void main()

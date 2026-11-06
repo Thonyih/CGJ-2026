@@ -93,24 +93,44 @@ glm::mat4 makeViewProjection(int width, int height)
     return projection * view;
 }
 
+// Tries to open the window with a given OpenGL version (major.minor) and
+// number of multisampling samples (smoother lines; 0 = off).
+// Returns nullptr if this PC cannot provide that version.
+GLFWwindow* createWindow(int major, int minor, int samples)
+{
+    glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, samples);
+    return glfwCreateWindow(1280, 720, "Lab 2 - GLM visual", nullptr, nullptr);
+}
+
 int main()
 {
     srand((unsigned int)time(nullptr));
     newRandomValues();
 
-    // --- Window and OpenGL 4.6 context ---
+    // --- Window and OpenGL context ---
     if (!glfwInit()) {
         std::cerr << "Failed to initialise GLFW\n";
         return 1;
     }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);   // smoother lines
 
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Lab 2 - GLM visual", nullptr, nullptr);
+    // Try OpenGL 4.6 first. Some PCs (for example Windows on ARM / Snapdragon)
+    // only offer an older OpenGL, so then try 3.3, which is all this program needs.
+    GLFWwindow* window = createWindow(4, 6, 4);
     if (window == nullptr) {
-        std::cerr << "Failed to create the window\n";
+        std::cout << "OpenGL 4.6 not available, trying OpenGL 3.3...\n";
+        window = createWindow(3, 3, 4);
+    }
+    if (window == nullptr) {
+        window = createWindow(3, 3, 0);   // last try: without smoothing (multisampling)
+    }
+    if (window == nullptr) {
+        std::cerr << "Failed to create the window: this PC has no OpenGL 3.3 or newer.\n"
+                  << "On Windows on ARM, install \"OpenCL, OpenGL, and Vulkan Compatibility Pack\"\n"
+                  << "from the Microsoft Store and try again.\n";
         glfwTerminate();
         return 1;
     }
