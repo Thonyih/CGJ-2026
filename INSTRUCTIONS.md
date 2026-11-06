@@ -5,8 +5,7 @@ This project targets **Windows only** and uses **OpenGL 4.6 Core**, with GLFW, G
 ## 1. Prerequisites
 
 - **Visual Studio Community** 2026 or 2022, with the **Desktop development with C++** workload. This installs the MSVC compiler, CMake and Ninja.
-- **Git**.
-- An internet connection for the first configure. CMake downloads GLFW 3.4, GLEW 2.2.0 and GLM 1.0.1 into `build/`, so there's nothing to install by hand.
+- Nothing else. GLFW 3.4, GLEW 2.2.0 and GLM 1.0.1 are included in the `libraries\` folder, so there is nothing to download or install, and no internet connection is needed.
 
 ## 2. Get the code
 
@@ -59,8 +58,10 @@ A window with a blue background should open, and the console prints the OpenGL v
 ## Project layout
 
 ```
-CMakeLists.txt       build configuration (downloads GLFW, GLEW, GLM)
+CMakeLists.txt       build configuration (uses the libraries in libraries/)
 CMakePresets.json    shared build presets for VS Code and Visual Studio
+libraries/           GLFW, GLEW and GLM, included with the project
+labs/                one self-contained folder per lab (own CMakeLists.txt, presets and libraries/)
 src/main.cpp         program entry point
 shaders/             GLSL shader files
 assets/              models, textures, etc.
@@ -69,11 +70,31 @@ Docs/                course lectures and lab instructions
 
 ## Differences from the lab setup guide
 
-The lab guide (`Docs/Lab/project_configuration_instructions.md`) puts prebuilt GLEW, GLFW and GLM zips in `libraries\` and configures the `.sln` by hand. This project gets the same libraries through CMake instead:
+The lab guide (`Docs/Lab/project_configuration_instructions.md`) has you extract prebuilt GLEW, GLFW and GLM into `libraries\` and configure the project properties by hand. This project uses the **same `libraries\` folder, the same three libraries and the same OpenGL linkage**, but `CMakeLists.txt` sets them up automatically. The code is the same either way (`#include <GL/glew.h>`, `<GLFW/glfw3.h>`, `<glm/glm.hpp>`).
 
-- GLEW and GLFW are linked **statically** (with `GLEW_STATIC` defined), so no DLLs need to be copied next to the exe.
-- `opengl32.lib` is linked automatically.
-- The console subsystem is already set, so there's no `WinMain` linker error.
+### Each lab-guide step and how it's covered
+
+| Lab guide step | In this project |
+|---|---|
+| Extract GLEW, GLFW, GLM into `libraries\` | Same: already included as `libraries\glew`, `libraries\glfw` and `libraries\glm` (source versions) |
+| Add each library's `include` folder to *Additional Include Directories* | Added automatically by `CMakeLists.txt` |
+| Add the `lib` folders to *Additional Library Directories* | Not needed: CMake knows where each library is |
+| Link `opengl32.lib`, `glew32.lib`, `glfw3dll.lib` | `target_link_libraries(... glew glfw)`, plus `opengl32` (GLM is header-only, nothing to link) |
+| Copy `glew32.dll` and `glfw3.dll` with a post-build `xcopy` | Not needed: GLEW and GLFW are linked **statically** (`GLEW_STATIC`), so the `.exe` runs on its own |
+| Set *Subsystem* to *Console* to avoid the `WinMain` LNK2019 error | Already the default for `add_executable` |
+| One project per entry point | One CMake target per program (`my-engine`, `lab2-glm`, …) |
+
+### Why this works the same or better
+
+- **Same result:** the program compiles against the same headers and links the same libraries. Only the way they are set up differs.
+- **Exact versions:**
+  - Each library is pinned to an exact version: GLFW 3.4, GLM 1.0.1 and GLEW 2.2.0.
+  - They are included in the project, so everyone who builds it gets identical libraries.
+- **Built with your own compiler:** the libraries are compiled from source by the same compiler as the project. That avoids mismatches with prebuilt binaries made for a specific compiler version (the guide's `lib-vc2022` folder).
+- **No manual configuration:** there are no property pages to fill in, no paths to type and no DLLs to copy. That removes the most common setup mistakes (wrong path, missing DLL, x86/x64 mix-up, Debug and Release set up differently).
+- **Debug and Release both work:** CMake applies the same library setup to every configuration, while the guide's settings have to be repeated for each one.
+- **Easy to add programs:** a new lab or assignment needs only a few lines in its own `CMakeLists.txt`, and it gets the libraries automatically.
+- **Works offline, nothing to install:** the libraries are in `libraries\`, so building needs only Visual Studio with the C++ workload.
 
 ## Troubleshooting
 
