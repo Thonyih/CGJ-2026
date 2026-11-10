@@ -12,8 +12,7 @@
 // Threshold for comparing floats (from the assignment).
 const float THRESHOLD = (float)1.0e-5;
 
-// Random vector with whole-number values between min and max.
-// Whole numbers keep the float results exact, so THRESHOLD = 1.0e-5 always works.
+// Professor Headers
 glm::vec3 randomVec(int min, int max)
 {
     static std::random_device rd;
