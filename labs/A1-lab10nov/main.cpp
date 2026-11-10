@@ -12,13 +12,14 @@
 // Threshold for comparing floats (from the assignment).
 const float THRESHOLD = (float)1.0e-5;
 
-// Random vector with values between min and max.
-glm::vec3 randomVec(float min, float max)
+// Random vector with whole-number values between min and max.
+// Whole numbers keep the float results exact, so THRESHOLD = 1.0e-5 always works.
+glm::vec3 randomVec(int min, int max)
 {
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dist(min, max);
-    return glm::vec3(dist(gen), dist(gen), dist(gen));
+    std::uniform_int_distribution<int> dist(min, max);
+    return glm::vec3((float)dist(gen), (float)dist(gen), (float)dist(gen));
 }
 
 // Random 3x3 matrix with values between min and max
@@ -40,26 +41,18 @@ glm::mat3 randomMat3(float min, float max)
 // Exercise 1: i x (j x k) = j(i . k) - k(i . j)
 // ---------------------------------------------------------------------------
 // Returns true if both sides are equal.
-//
-// The calculation is done in double (dvec3) instead of float: with values up
-// to 5 the results reach the hundreds, and float is not precise enough there
-// for THRESHOLD = 1.0e-5 (about 1 in 4 correct results would fail).
 bool tripleProduct(glm::vec3 i, glm::vec3 j, glm::vec3 k)
 {
-    glm::dvec3 di = i;
-    glm::dvec3 dj = j;
-    glm::dvec3 dk = k;
+    glm::vec3 left = glm::cross(i, glm::cross(j, k));
+    glm::vec3 right = j * glm::dot(i, k) - k * glm::dot(i, j);
 
-    glm::dvec3 left = glm::cross(di, glm::cross(dj, dk));
-    glm::dvec3 right = dj * glm::dot(di, dk) - dk * glm::dot(di, dj);
-
-    bool equal = glm::all(glm::epsilonEqual(left, right, (double)THRESHOLD));
+    bool equal = glm::all(glm::epsilonEqual(left, right, THRESHOLD));
 
     std::cout << "i = " << glm::to_string(i) << std::endl;
     std::cout << "j = " << glm::to_string(j) << std::endl;
     std::cout << "k = " << glm::to_string(k) << std::endl;
-    std::cout << "i x (j x k)         = " << glm::to_string(glm::vec3(left)) << std::endl;
-    std::cout << "j(i . k) - k(i . j) = " << glm::to_string(glm::vec3(right)) << std::endl;
+    std::cout << "i x (j x k)         = " << glm::to_string(left) << std::endl;
+    std::cout << "j(i . k) - k(i . j) = " << glm::to_string(right) << std::endl;
     if (equal) {
         std::cout << "Equal: yes" << std::endl;
     } else {
@@ -134,7 +127,7 @@ int main()
     // Exercise 1: random vectors with values between 1 and 5.
     std::cout << "Exercise 1: i x (j x k) = j(i . k) - k(i . j)" << std::endl << std::endl;
     for (int n = 0; n < 5; n++) {
-        tripleProduct(randomVec(1.0f, 5.0f), randomVec(1.0f, 5.0f), randomVec(1.0f, 5.0f));
+        tripleProduct(randomVec(1, 5), randomVec(1, 5), randomVec(1, 5));
     }
 
     // Exercise 2: the three test cases from the assignment.

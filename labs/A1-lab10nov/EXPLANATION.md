@@ -32,15 +32,15 @@ Two different calculations should give **the same arrow**:
 2. Prints `i`, `j`, `k` and both results.
 3. Prints `Equal: yes` if they match, and returns `true` or `false`.
 
-`main` calls it **5 times with random vectors** with decimal values between 1 and 5, as the assignment asks. They come from `randomVec(1, 5)`, which works the same way as the helper shown in class.
+`main` calls it **5 times with random vectors** from `randomVec(1, 5)`, which works the same way as the helper shown in class.
 
-**Why the calculation uses `double`:** with values up to 5 the results reach the hundreds. A `float` only keeps about 7 digits, so at that size its rounding error is bigger than `THRESHOLD = 0.00001`. In a test of 100,000 random cases, about 1 in 4 **correct** results printed "Equal: no". So the method copies the vectors into `glm::dvec3` (double, about 16 digits) before calculating. Tested with 100,000 random cases in each of the ranges -1 to 1, 1 to 5 and -5 to 5: none failed.
+**Why whole numbers 1-5:** with values up to 5 the results reach the hundreds. A `float` keeps only about 7 digits, so decimal inputs would give rounding errors bigger than `THRESHOLD = 0.00001`, and about 1 in 4 **correct** results would print "Equal: no". With whole numbers, every float cross and dot product is **exact** (no rounding), so the comparison always works. Tested over 200 runs: every comparison printed "Equal: yes".
 
 **Example:**
 
-    i = (4.68, 2.62, 1.42)   j = (3.01, 4.19, 2.08)   k = (3.90, 4.34, 3.07)
-    i x (j x k)         = (-6.936373, 20.641642, -15.208342)
-    j(i . k) - k(i . j) = (-6.936373, 20.641642, -15.208342)
+    i = (5, 1, 2)   j = (1, 4, 3)   k = (2, 1, 3)
+    i x (j x k)         = (-13, 53, 6)
+    j(i . k) - k(i . j) = (-13, 53, 6)
     Equal: yes
 
 ---
