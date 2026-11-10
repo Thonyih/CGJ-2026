@@ -21,9 +21,7 @@ The program exits with code 0 only when every check passes.
 
 | File | Contents |
 |---|---|
-| `main.cpp` | Seeds the random numbers, runs exercises 1-5 and prints the summary |
-| `exercises.cpp` | One function per exercise, plus `orthogonalVector` and `areOrthogonal` |
-| `helpers.cpp` | Random vectors, float comparison with a tolerance, printing, `check()` |
+| `main.cpp` | **All the code, in one file**, in this order: 1. settings and colours, 2. helpers (random vectors, float comparison with a tolerance, printing, `check()`), 3. matrix builders, 4. exercises 1-5 (with `orthogonalVector` and `areOrthogonal`), 5. `main()`, which seeds the random numbers, runs the exercises and prints the summary |
 | `libraries/glm` | GLM 1.0.1 (header-only) |
 
 ## Status

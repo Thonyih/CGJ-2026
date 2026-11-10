@@ -13,12 +13,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Console program, no window.
-add_executable(lab2-glm
-    main.cpp
-    helpers.cpp
-    exercises.cpp
-)
+# Console program, no window. All the code is in main.cpp.
+add_executable(lab2-glm main.cpp)
 
 # GLM 1.0.1 is included in this lab's libraries\glm folder.
 # It is header-only, so it only needs its include folder (nothing to link).

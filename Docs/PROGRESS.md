@@ -2,6 +2,10 @@
 
 What has been done, newest first.
 
+## 2026-11-10 - Lab 2 (GLM): single source file
+- `labs/lab2-glm/` now has all its code in one file, `main.cpp`. It's in five sections: settings, helpers, matrix builders, exercises 1-5, `main()`.
+- Verified: builds standalone and from the root, with Ninja and with the Visual Studio 2026 solution. Still 42 / 42 checks.
+
 ## 2026-11-06 - Lab 2 visual moved to its own folder
 - `labs/lab2-visual/` is now a separate, self-contained program with its own CMake files and libraries (GLM, GLFW, GLEW).
 - `labs/lab2-glm/` is back to the console program with only GLM.

@@ -32,7 +32,7 @@ This folder is **self-contained**: it has its own `CMakeLists.txt` and `CMakePre
 | `main.cpp` | Window, keyboard and camera |
 | `renderer.cpp` | Minimal line renderer: one shader, one buffer, lines and points |
 | `scenes.cpp` | One drawing per exercise |
-| `exercises.cpp`, `helpers.cpp` | **Copies** of Lab 2's files, so this folder stands alone. The drawings use the same maths that `lab2-glm` checks. If those files change in `lab2-glm`, copy them here too |
+| `exercises.cpp`, `helpers.cpp` | The same maths and helper functions as `lab2-glm` (whose code is now all in its `main.cpp`), kept here as separate files so this folder stands alone. If the maths changes in `lab2-glm/main.cpp`, update these too |
 | `libraries/` | GLM, GLFW, GLEW |
 
 ## Requirements and Windows on ARM
