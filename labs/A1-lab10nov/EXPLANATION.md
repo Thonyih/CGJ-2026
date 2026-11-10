@@ -30,17 +30,17 @@ Two different calculations should give **the same arrow**:
 **What the code does** (`tripleProduct`):
 1. Computes the left side and the right side.
 2. Prints `i`, `j`, `k` and both results.
-3. Prints `Equal: yes` if they match.
+3. Prints `Equal: yes` if they match, and returns `true` or `false`.
 
-`main` calls it **5 times with random vectors**, as the assignment asks.
+`main` calls it **5 times with random vectors** with decimal values between 1 and 5, as the assignment asks. They come from `randomVec(1, 5)`, which works the same way as the helper shown in class.
 
-**Why whole numbers 1-5:** with whole numbers, every cross and dot product is exact (no rounding), so the very strict `THRESHOLD` never fails by accident.
+**Why the calculation uses `double`:** with values up to 5 the results reach the hundreds. A `float` only keeps about 7 digits, so at that size its rounding error is bigger than `THRESHOLD = 0.00001`. In a test of 100,000 random cases, about 1 in 4 **correct** results printed "Equal: no". So the method copies the vectors into `glm::dvec3` (double, about 16 digits) before calculating. Tested with 100,000 random cases in each of the ranges -1 to 1, 1 to 5 and -5 to 5: none failed.
 
 **Example:**
 
-    i = (4, 4, 2)   j = (3, 5, 2)   k = (1, 3, 2)
-    i x (j x k)         = (24, -8, -32)
-    j(i . k) - k(i . j) = (24, -8, -32)
+    i = (4.68, 2.62, 1.42)   j = (3.01, 4.19, 2.08)   k = (3.90, 4.34, 3.07)
+    i x (j x k)         = (-6.936373, 20.641642, -15.208342)
+    j(i . k) - k(i . j) = (-6.936373, 20.641642, -15.208342)
     Equal: yes
 
 ---
@@ -93,7 +93,7 @@ The `up` you give is only a rough hint. The real `u` comes out exactly at 90° t
 | `a(a . v)(1 - cos(t))` | keeps the part of `v` that lies along the axis (that part never moves) |
 
 **What the code does:**
-- `rodrigues(v, axis, degrees)` returns the rotated vector. It converts degrees to radians first, because `cos` and `sin` use radians.
+- `rodrigues(v, axis, angle)` returns the rotated vector. The angle is in **radians**, like everywhere else in GLM (for example `glm::rotate`). To use degrees, pass `glm::radians(degrees)`.
 - `testRodrigues` prints the input, the **expected** result and the computed result, then `Equal: yes/no`.
 
 **The 3 tests** (inputs chosen so the answer is easy to work out by hand):

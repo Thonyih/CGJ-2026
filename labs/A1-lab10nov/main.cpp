@@ -1,54 +1,73 @@
 // Assignment A1 - Math Challenge, exercises 1 to 3
 
 #include <cmath>
-#include <cstdlib>
-#include <ctime>
 #include <iostream>
+#include <random>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/epsilon.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>   // glm::to_string, to print vectors
 
 // Threshold for comparing floats (from the assignment).
 const float THRESHOLD = (float)1.0e-5;
 
-// Prints a vector as (x, y, z).
-void printVector(const char* name, glm::vec3 v)
+// Random vector with values between min and max.
+glm::vec3 randomVec(float min, float max)
 {
-    std::cout << name << " = (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(min, max);
+    return glm::vec3(dist(gen), dist(gen), dist(gen));
 }
 
-// Returns true if the two vectors are equal (within THRESHOLD).
-bool isEqual(glm::vec3 a, glm::vec3 b)
+// Random 3x3 matrix with values between min and max
+glm::mat3 randomMat3(float min, float max)
 {
-    return glm::all(glm::epsilonEqual(a, b, THRESHOLD));
-}
-
-// Returns a random whole number between 1 and 5.
-float randomValue()
-{
-    return (float)(rand() % 5 + 1);
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(min, max);
+    glm::mat3 randomMat;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            randomMat[i][j] = dist(gen);
+        }
+    }
+    return randomMat;
 }
 
 // ---------------------------------------------------------------------------
 // Exercise 1: i x (j x k) = j(i . k) - k(i . j)
 // ---------------------------------------------------------------------------
-void tripleProduct(glm::vec3 i, glm::vec3 j, glm::vec3 k)
+// Returns true if both sides are equal.
+//
+// The calculation is done in double (dvec3) instead of float: with values up
+// to 5 the results reach the hundreds, and float is not precise enough there
+// for THRESHOLD = 1.0e-5 (about 1 in 4 correct results would fail).
+bool tripleProduct(glm::vec3 i, glm::vec3 j, glm::vec3 k)
 {
-    glm::vec3 left = glm::cross(i, glm::cross(j, k));
-    glm::vec3 right = j * glm::dot(i, k) - k * glm::dot(i, j);
+    glm::dvec3 di = i;
+    glm::dvec3 dj = j;
+    glm::dvec3 dk = k;
 
-    printVector("i", i);
-    printVector("j", j);
-    printVector("k", k);
-    printVector("i x (j x k)", left);
-    printVector("j(i . k) - k(i . j)", right);
+    glm::dvec3 left = glm::cross(di, glm::cross(dj, dk));
+    glm::dvec3 right = dj * glm::dot(di, dk) - dk * glm::dot(di, dj);
 
-    if (isEqual(left, right)) {
+    bool equal = glm::all(glm::epsilonEqual(left, right, (double)THRESHOLD));
+
+    std::cout << "i = " << glm::to_string(i) << std::endl;
+    std::cout << "j = " << glm::to_string(j) << std::endl;
+    std::cout << "k = " << glm::to_string(k) << std::endl;
+    std::cout << "i x (j x k)         = " << glm::to_string(glm::vec3(left)) << std::endl;
+    std::cout << "j(i . k) - k(i . j) = " << glm::to_string(glm::vec3(right)) << std::endl;
+    if (equal) {
         std::cout << "Equal: yes" << std::endl;
     } else {
         std::cout << "Equal: no" << std::endl;
     }
     std::cout << std::endl;
+
+    return equal;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,8 +78,8 @@ void tripleProduct(glm::vec3 i, glm::vec3 j, glm::vec3 k)
 // ---------------------------------------------------------------------------
 void cameraFrame(glm::vec3 view, glm::vec3 up)
 {
-    printVector("view", view);
-    printVector("up", up);
+    std::cout << "view = " << glm::to_string(view) << std::endl;
+    std::cout << "up   = " << glm::to_string(up) << std::endl;
 
     glm::vec3 v = view / glm::length(view);
     glm::vec3 upCrossV = glm::cross(up, v);
@@ -75,9 +94,9 @@ void cameraFrame(glm::vec3 view, glm::vec3 up)
     glm::vec3 w = upCrossV / glm::length(upCrossV);
     glm::vec3 u = glm::cross(v, w);
 
-    printVector("v", v);
-    printVector("w", w);
-    printVector("u", u);
+    std::cout << "v = " << glm::to_string(v) << std::endl;
+    std::cout << "w = " << glm::to_string(w) << std::endl;
+    std::cout << "u = " << glm::to_string(u) << std::endl;
     std::cout << std::endl;
 }
 
@@ -85,25 +104,24 @@ void cameraFrame(glm::vec3 view, glm::vec3 up)
 // Exercise 3: Rodrigues rotation formula
 //   vrot = v cos(t) + (a x v) sin(t) + a (a . v)(1 - cos(t))
 // ---------------------------------------------------------------------------
-glm::vec3 rodrigues(glm::vec3 v, glm::vec3 axis, float degrees)
+// The angle is in radians, like the rest of GLM (use glm::radians(degrees)).
+glm::vec3 rodrigues(glm::vec3 v, glm::vec3 axis, float angle)
 {
     glm::vec3 a = glm::normalize(axis);
-    float t = glm::radians(degrees);
 
-    return v * std::cos(t) + glm::cross(a, v) * std::sin(t) + a * glm::dot(a, v) * (1.0f - std::cos(t));
+    return v * std::cos(angle) + glm::cross(a, v) * std::sin(angle) + a * glm::dot(a, v) * (1.0f - std::cos(angle));
 }
 
 void testRodrigues(glm::vec3 v, glm::vec3 axis, float degrees, glm::vec3 expected)
 {
-    glm::vec3 result = rodrigues(v, axis, degrees);
+    glm::vec3 result = rodrigues(v, axis, glm::radians(degrees));
 
-    printVector("v", v);
-    printVector("axis", axis);
-    std::cout << "angle = " << degrees << std::endl;
-    printVector("expected", expected);
-    printVector("result", result);
-
-    if (isEqual(result, expected)) {
+    std::cout << "v        = " << glm::to_string(v) << std::endl;
+    std::cout << "axis     = " << glm::to_string(axis) << std::endl;
+    std::cout << "angle    = " << degrees << " degrees" << std::endl;
+    std::cout << "expected = " << glm::to_string(expected) << std::endl;
+    std::cout << "result   = " << glm::to_string(result) << std::endl;
+    if (glm::all(glm::epsilonEqual(result, expected, THRESHOLD))) {
         std::cout << "Equal: yes" << std::endl;
     } else {
         std::cout << "Equal: no" << std::endl;
@@ -113,15 +131,10 @@ void testRodrigues(glm::vec3 v, glm::vec3 axis, float degrees, glm::vec3 expecte
 
 int main()
 {
-    srand((unsigned int)time(nullptr));
-
     // Exercise 1: random vectors with values between 1 and 5.
     std::cout << "Exercise 1: i x (j x k) = j(i . k) - k(i . j)" << std::endl << std::endl;
     for (int n = 0; n < 5; n++) {
-        glm::vec3 i(randomValue(), randomValue(), randomValue());
-        glm::vec3 j(randomValue(), randomValue(), randomValue());
-        glm::vec3 k(randomValue(), randomValue(), randomValue());
-        tripleProduct(i, j, k);
+        tripleProduct(randomVec(1.0f, 5.0f), randomVec(1.0f, 5.0f), randomVec(1.0f, 5.0f));
     }
 
     // Exercise 2: the three test cases from the assignment.

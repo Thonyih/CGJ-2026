@@ -14,9 +14,11 @@ This folder is self-contained: it has its own `CMakeLists.txt` and `CMakePresets
 
 | Exercise | Method | What it does |
 |---|---|---|
-| 1 | `tripleProduct(i, j, k)` | Computes i x (j x k) and j(i . k) - k(i . j), prints both and whether they are equal. Called 5 times with random whole numbers from 1 to 5 |
+| 1 | `tripleProduct(i, j, k)` | Computes i x (j x k) and j(i . k) - k(i . j) in double precision, prints both and whether they are equal, and returns `true` or `false`. Called 5 times with `randomVec(1, 5)` |
 | 2 | `cameraFrame(view, up)` | Computes and prints v, w and u. If view and up are parallel, it prints an error instead (it can't divide by zero). Called with the 3 cases from the assignment |
-| 3 | `rodrigues(v, axis, degrees)` | Returns the rotated vector. `testRodrigues` prints the input, the expected output and the result, and whether they are equal |
+| 3 | `rodrigues(v, axis, angle)` | Returns the rotated vector. The angle is in radians, as in GLM. `testRodrigues` prints the input, the expected output and the result, and whether they are equal |
+
+Helpers: `randomVec(min, max)` and `randomMat3(min, max)` use the same technique as the helpers shown in class (`std::mt19937` + `uniform_real_distribution`), with the range as a parameter. Vectors are printed with `glm::to_string`.
 
 Comparisons use `THRESHOLD = 1.0e-5` and `glm::epsilonEqual`, as the assignment asks.
 
