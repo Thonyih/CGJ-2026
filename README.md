@@ -7,4 +7,5 @@ See [INSTRUCTIONS.md](INSTRUCTIONS.md) for how to build and run the project.
 | `src/` | `my-engine`, the OpenGL program |
 | `labs/lab2-glm/` | Lab 2, GLM exercises ([README](labs/lab2-glm/README.md)) |
 | `labs/lab2-visual/` | Lab 2 drawn in an OpenGL window ([README](labs/lab2-visual/README.md)) |
+| `labs/A1-lab10nov/` | Assignment A1, exercises 1-3 ([README](labs/A1-lab10nov/README.md)) |
 | `Docs/PROGRESS.md` | Progress log |

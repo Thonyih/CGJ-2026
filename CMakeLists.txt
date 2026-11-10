@@ -56,3 +56,4 @@ set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT my-engine
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_subdirectory(labs/lab2-glm)
 add_subdirectory(labs/lab2-visual)
+add_subdirectory(labs/A1-lab10nov)

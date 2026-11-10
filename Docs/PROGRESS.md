@@ -2,6 +2,15 @@
 
 What has been done, newest first.
 
+## 2026-11-10 - Assignment A1: exercises 1-3
+- Added `labs/A1-lab10nov/`, a self-contained console program in one `main.cpp`:
+  - triple product (5 random tests, values 1-5)
+  - camera frame from view and up (the 3 given cases, including the parallel case, which is detected)
+  - Rodrigues rotation in vector form (3 calls with expected outputs)
+- Uses `THRESHOLD = 1.0e-5` and `glm::epsilonEqual`, as the assignment requires.
+- Simplified to plain output (no colours or PASS/FAIL markers): each comparison prints "Equal: yes/no". All comparisons print yes.
+- Verified: builds standalone and from the root, with Ninja and with the Visual Studio 2026 solution.
+
 ## 2026-11-10 - Lab 2 (GLM): single source file
 - `labs/lab2-glm/` now has all its code in one file, `main.cpp`. It's in five sections: settings, helpers, matrix builders, exercises 1-5, `main()`.
 - Verified: builds standalone and from the root, with Ninja and with the Visual Studio 2026 solution. Still 42 / 42 checks.
