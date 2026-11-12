@@ -1,4 +1,4 @@
-# A1 Exercises 1-3, Explained
+# A1 Exercises 1-6, Explained
 
 ## Basics you need
 
@@ -105,3 +105,83 @@ The `up` you give is only a rough hint. The real `u` comes out exactly at 90° t
 | (4, 4, 4) | (3, 3, 3) | 90° | (4, 4, 4) | `v` lies on the axis, so it does not move (`a x v = 0`) |
 
 All three print `Equal: yes`.
+
+---
+
+## Basics for exercises 4-6: matrices
+
+- **Matrix:** a 3x3 grid of numbers (`glm::mat3`). Multiplying a matrix by a vector transforms the vector, for example rotating it.
+- **Identity `I`:** 1s on the diagonal and 0s elsewhere. It changes nothing (`glm::mat3(1.0f)`).
+- **Matrix product `AB`:** applies `B` first, then `A`. Order matters: usually `AB != BA`.
+- **Transpose `A^T`:** rows become columns. `glm::transpose(A)`.
+- **Determinant `det(A)`:** one number. If it is 0, the matrix squashes space flat and **cannot be undone**. `glm::determinant(A)`.
+- **Inverse `A^-1`:** the matrix that undoes `A` (`A * A^-1 = I`). It only exists if `det(A) != 0`. `glm::inverse(A)`.
+- **GLM is column-major:** `A[column][row]`, not `A[row][column]`.
+- `glm::to_string(matrix)` prints the matrix **column by column**: each `( )` group is one column.
+
+---
+
+## Exercise 4: Rodrigues rotation formula, matrix form
+
+**The idea:** the same rotation as Exercise 3, but as a **matrix** `R`. Then rotating any vector is just `R * v`.
+
+    R = I + sin(t) A + (1 - cos(t)) A^2
+
+`A` is built from the unit axis `a = (ax, ay, az)`:
+
+          |  0  -az   ay |
+      A = |  az   0  -ax |
+          | -ay  ax    0 |
+
+`A` is special: `A * v` gives the same result as `a x v` (the cross product). So the matrix formula is just Exercise 3's formula written with matrices. The lecture derives it using the triple product from Exercise 1.
+
+**What the code does:**
+- `rodriguesMatrix(axis, angle)` normalizes the axis, fills `A` entry by entry (remembering `A[column][row]`), and returns `I + sin(t) A + (1 - cos(t)) A*A`. The angle is in radians.
+- `testRodriguesMatrix` builds `R`, computes `R * v`, and prints the input, the expected result, the computed result and `Equal: yes/no`.
+
+**The 9 tests:** the assignment asks to rotate each axis (x, y, z) by 90° around x, then y, then z.
+
+| Rotate around | Rule | x axis (1,0,0) | y axis (0,1,0) | z axis (0,0,1) |
+|---|---|---|---|---|
+| x | (x, y, z) → (x, -z, y) | (1, 0, 0) | (0, 0, 1) | (0, -1, 0) |
+| y | (x, y, z) → (z, y, -x) | (0, 0, -1) | (0, 1, 0) | (1, 0, 0) |
+| z | (x, y, z) → (-y, x, z) | (0, 1, 0) | (-1, 0, 0) | (0, 0, 1) |
+
+An axis rotated around **itself** doesn't move (the diagonal of the table).
+
+---
+
+## Exercise 5: (AB)^T = B^T A^T
+
+**The rule:** transposing a product is the same as multiplying the transposes **in the opposite order**.
+
+**What the code does** (`transposeProperty`):
+1. Left side: multiply `A * B`, then transpose.
+2. Right side: transpose `B`, transpose `A`, multiply them (`B^T * A^T`).
+3. Prints `A`, `B` and both results, plus `Equal: yes/no`, and returns `true` or `false`.
+
+`main` calls it **5 times with random matrices** from `randomMat3(-5, 5)`.
+
+**Why the order flips:** think of putting on socks then shoes. To undo it you take off the shoes first, then the socks. The transpose works the same way.
+
+---
+
+## Exercise 6: (AB)^-1 = B^-1 A^-1
+
+**The rule:** the inverse of a product is the product of the inverses **in the opposite order**, for the same "socks and shoes" reason.
+
+**What the code does** (`inverseProperty`):
+1. Prints `A`, `B` and their determinants.
+2. If either determinant is 0, it prints an error and stops, because there is no inverse.
+3. Left side: `inverse(A * B)`. Right side: `inverse(B) * inverse(A)`.
+4. Prints both results and `Equal: yes/no`, and returns `true` or `false`.
+
+**Making sure A and B are invertible:** before calling the method, `main` keeps picking new random matrices until `det != 0`, as the assignment asks.
+
+**Why whole numbers again:** inverses produce fractions (for example `-5.466667`). With random **decimal** matrices, float rounding made about 8 in 100 correct results print "no". With whole numbers it was 3 in about 95,000, and none in 200 full runs of the program.
+
+---
+
+## Checking all six
+
+Over 200 runs of the program (27 comparisons per run), every comparison printed `Equal: yes`.

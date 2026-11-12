@@ -2,6 +2,14 @@
 
 What has been done, newest first.
 
+## 2026-11-12 - Assignment A1: exercises 4-6
+- Added to `labs/A1-lab10nov/main.cpp`:
+  - Rodrigues rotation in matrix form (each axis rotated by 90° around x, y and z: 9 tests with expected outputs)
+  - (AB)^T = B^T A^T (5 random matrix pairs, values -5 to 5)
+  - (AB)^-1 = B^-1 A^-1 (5 random invertible pairs, det != 0)
+- `float` only. Random values are whole numbers so float precision stays within `THRESHOLD = 1.0e-5`.
+- Verified: 200 runs, 5,400 comparisons, all "Equal: yes". Builds standalone and from the root, with Ninja and with Visual Studio 2026.
+
 ## 2026-11-10 - Assignment A1: exercises 1-3
 - Added `labs/A1-lab10nov/`, a self-contained console program in one `main.cpp`:
   - triple product (5 random tests, values 1-5)
