@@ -56,8 +56,11 @@ struct Vertex {
 
 // Every base shape is created exactly as it sits in the stock Tangram square,
 // so all its numbers can be checked against the sizing picture.
-// Each one has a REFERENCE POINT at the origin (0, 0). Placing a piece later
-// means "move that reference point to (x, y)".
+//
+// ONE RULE FOR ALL 3 SHAPES: corner 0 is at the origin (0, 0), and the other
+// corners follow counter-clockwise. Corner 0 is the shape's REFERENCE POINT:
+//   - rotate turns the shape around corner 0
+//   - translate(x, y) moves corner 0 to (x, y)
 //
 // The corners are listed COUNTER-CLOCKWISE (right-hand rule, Lecture 2).
 // The mgl engine turns on face culling with glFrontFace(GL_CCW): triangles
@@ -68,38 +71,38 @@ struct Vertex {
 // into 2 triangles: (0, 1, 2) and (0, 2, 3).
 
 // --- Right triangle: the LARGE triangle (long side 1) ---
-// Long side on the x axis from -1/2 to 1/2, right angle on top at (0, 1/2).
-// Reference point (+): the middle of the long side.
+// Long side on the x axis from (0, 0) to (1, 0), right angle on top.
+// Reference point: corner 0, the left end of the long side.
 // Short sides: sqrt(2)/2. All 5 triangle pieces are this triangle, scaled.
 //
-//       2          0 = (-1/2, 0)
-//     /   \   .    1 = ( 1/2, 0)
-//   0---+---1      2 = ( 0,  1/2), the right angle
+//       2          0 = (0, 0)
+//     /   \   .    1 = (1, 0)
+//   0-------1      2 = (1/2, 1/2), the right angle
 const Vertex TriangleVertices[] = {
-    {{-0.5f, 0.0f, 0.0f, 1.0f}},
-    {{0.5f, 0.0f, 0.0f, 1.0f}},
-    {{0.0f, 0.5f, 0.0f, 1.0f}}};
+    {{0.0f, 0.0f, 0.0f, 1.0f}},
+    {{1.0f, 0.0f, 0.0f, 1.0f}},
+    {{0.5f, 0.5f, 0.0f, 1.0f}}};
 const GLubyte TriangleIndices[] = {0, 1, 2};
 
 // --- Square: a diamond with diagonal 1/2 (side sqrt(2)/4) ---
-// Reference point (+): the centre.
+// Reference point: corner 0, the bottom corner.
 //
-//      2           0 = (0, -1/4)
-//    /   \   .     1 = (1/4, 0)
-//   3  +  1        2 = (0, 1/4)
-//    \   /         3 = (-1/4, 0)
+//      2           0 = (0, 0)
+//    /   \   .     1 = (1/4, 1/4)
+//   3     1        2 = (0, 1/2)
+//    \   /         3 = (-1/4, 1/4)
 //      0
 const Vertex SquareVertices[] = {
-    {{0.0f, -0.25f, 0.0f, 1.0f}},
-    {{0.25f, 0.0f, 0.0f, 1.0f}},
-    {{0.0f, 0.25f, 0.0f, 1.0f}},
-    {{-0.25f, 0.0f, 0.0f, 1.0f}}};
+    {{0.0f, 0.0f, 0.0f, 1.0f}},
+    {{0.25f, 0.25f, 0.0f, 1.0f}},
+    {{0.0f, 0.5f, 0.0f, 1.0f}},
+    {{-0.25f, 0.25f, 0.0f, 1.0f}}};
 const GLubyte SquareIndices[] = {0, 1, 2, 0, 2, 3};
 
 // --- Parallelogram: sides 1/2 and sqrt(2)/4 ---
 // Long side 1/2 along the bottom, short sides going up and to the right at
 // 45 degrees, as in the stock square.
-// Reference point: corner 0.
+// Reference point: corner 0, the bottom-left corner.
 //
 //      3-------2   0 = (0, 0)      1 = (1/2, 0)
 //     /       /    2 = (3/4, 1/4)  3 = (1/4, 1/4)
@@ -265,8 +268,8 @@ const glm::mat4 SCENE =
 // Read it RIGHT TO LEFT - this is the order the steps happen to each corner:
 //   S: scale the base shape by "size" (z is left at 1)
 //   R: rotate it by "angleDegrees" around the z axis (counter-clockwise),
-//      around its reference point, which is still at (0, 0)
-//   T: move the reference point to (x, y)
+//      around corner 0, which is still at (0, 0)
+//   T: move corner 0 to (x, y)
 //   SCENE: fit the whole shark into clip space
 // Order matters (Lecture 2: RS != SR, TR != RT). Rotating AFTER moving would
 // swing the piece around (0, 0) like a door on a hinge.
@@ -373,28 +376,28 @@ void MyApp::destroyBufferObjects() {
 
 // Places the 7 pieces of the shark.
 //   modelMatrix(x, y, angle, scale):
-//     (x, y)  where the base shape's reference point goes
+//     (x, y)  where the base shape's corner 0 goes
 //     angle   in degrees, counter-clockwise (negative = clockwise)
 //     scale   1 = large, sqrt(2)/2 = medium, 1/2 = small triangle
-// The shark's own origin (0, 0) is the middle of the magenta body's long side.
+// The shark's own origin (0, 0) is the head's right corner (where the head,
+// the lower fin and the body meet).
 // Every position was checked by working out the moved corners by hand.
 void MyApp::createPieces() {
   // 0. Head: large triangle, exactly as in the stock square (long side level).
-  Pieces[0].set(&Triangle, BLUE, modelMatrix(-0.5f, 0.0f, 0.0f, 1.0f));
+  Pieces[0].set(&Triangle, BLUE, modelMatrix(-1.0f, 0.0f, 0.0f, 1.0f));
 
   // 1. Body: large triangle, turned 45 degrees clockwise, so its right angle
   //    points up and to the right.
-  Pieces[1].set(&Triangle, MAGENTA, modelMatrix(0.0f, 0.0f, -45.0f, 1.0f));
+  Pieces[1].set(&Triangle, MAGENTA, modelMatrix(-Q, Q, -45.0f, 1.0f));
 
   // 2. Top fin: small triangle (scale 1/2) sitting on top of the body.
-  Pieces[2].set(&Triangle, TEAL,
-                modelMatrix(0.5f * Q, 1.5f * Q, -135.0f, 0.5f));
+  Pieces[2].set(&Triangle, TEAL, modelMatrix(Q, 2.0f * Q, -135.0f, 0.5f));
 
   // 3. Lower fin: small triangle (scale 1/2) under the head, upside down.
-  Pieces[3].set(&Triangle, RED, modelMatrix(-0.25f, 0.0f, 180.0f, 0.5f));
+  Pieces[3].set(&Triangle, RED, modelMatrix(0.0f, 0.0f, 180.0f, 0.5f));
 
   // 4. Middle of the body: square, turned 45 degrees so its sides are level.
-  Pieces[4].set(&Square, GREEN, modelMatrix(1.5f * Q, 0.5f * Q, 45.0f, 1.0f));
+  Pieces[4].set(&Square, GREEN, modelMatrix(2.0f * Q, 0.0f, 45.0f, 1.0f));
 
   // 5. Tail stalk: parallelogram, turned 45 degrees so it goes up to the right.
   Pieces[5].set(&Parallelogram, ORANGE,
@@ -402,8 +405,7 @@ void MyApp::createPieces() {
 
   // 6. Tail: medium triangle (scale sqrt(2)/2).
   Pieces[6].set(&Triangle, PURPLE,
-                modelMatrix(3.0f * Q + 0.25f, Q + 0.25f, 135.0f,
-                            SQRT2 / 2.0f));
+                modelMatrix(3.0f * Q + 0.5f, Q, 135.0f, SQRT2 / 2.0f));
 }
 
 ///////////////////////////////////////////////////////////////////////// SCENE

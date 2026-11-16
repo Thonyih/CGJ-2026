@@ -48,25 +48,25 @@ The sizes follow the assignment's sizing picture (`Tangram-Stock-Sizing.jpeg`): 
 | square | square | diagonal ½, side √2/4 | 1 |
 | parallelogram | parallelogram | sides ½ and √2/4 | 1 |
 
-Each base shape is created the way it sits in the stock square, with its reference point at (0, 0), so `translate(x, y)` puts that point at (x, y):
+Each base shape is created the way it sits in the stock square. One rule for all three: **corner 0 is at (0, 0)**, and the other corners follow counter-clockwise. Rotate turns the shape around corner 0, and `translate(x, y)` puts corner 0 at (x, y).
 
-| Base shape | Vertices | Reference point |
+| Base shape | Vertices (corner 0 first) | Corner 0 is |
 |---|---|---|
-| right triangle (large) | (−½, 0), (½, 0), (0, ½) | middle of the long side |
-| square (diamond) | (0, −¼), (¼, 0), (0, ¼), (−¼, 0) | centre |
+| right triangle (large) | (0, 0), (1, 0), (½, ½) | left end of the long side |
+| square (diamond) | (0, 0), (¼, ¼), (0, ½), (−¼, ¼) | bottom corner |
 | parallelogram | (0, 0), (½, 0), (¾, ¼), (¼, ¼) | bottom-left corner |
 
-Placement, with Q = √2/4 (the short side of a small triangle). The shark's origin is the middle of the magenta body's long side. Angles are counter-clockwise.
+Placement, with Q = √2/4 (the short side of a small triangle). The shark's origin is the head's right corner, where the head, the lower fin and the body meet. Angles are counter-clockwise.
 
-| Piece | Colour | Point (x, y) | Rotation | Scale |
+| Piece | Colour | Corner 0 goes to | Rotation | Scale |
 |---|---|---|---|---|
-| Head, large triangle | blue | (−½, 0) | 0° | 1 |
-| Body, large triangle | magenta | (0, 0) | −45° | 1 |
-| Top fin, small triangle | teal | (Q/2, 3Q/2) | −135° | ½ |
-| Lower fin, small triangle | red | (−¼, 0) | 180° | ½ |
-| Body, square | green | (3Q/2, Q/2) | 45° | 1 |
+| Head, large triangle | blue | (−1, 0) | 0° | 1 |
+| Body, large triangle | magenta | (−Q, Q) | −45° | 1 |
+| Top fin, small triangle | teal | (Q, 2Q) | −135° | ½ |
+| Lower fin, small triangle | red | (0, 0) | 180° | ½ |
+| Body, square | green | (2Q, 0) | 45° | 1 |
 | Tail stalk, parallelogram | orange | (2Q, 0) | 45° | 1 |
-| Tail, medium triangle | purple | (3Q + ¼, Q + ¼) | 135° | √2/2 |
+| Tail, medium triangle | purple | (3Q + ½, Q) | 135° | √2/2 |
 
 The shape was measured from the coloured shark picture, and each placement was checked by computing the transformed vertices by hand.
 
