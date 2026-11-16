@@ -16,23 +16,15 @@ cd CGJ-2026
 
 ## 3. Build and run
 
-You can use any of the three options below. They all use the same `CMakeLists.txt` and `CMakePresets.json`.
+**Visual Studio Community is the main target.** Every program is checked in Visual Studio first. Options A and B use Visual Studio; option C (VS Code) is an alternative. All options use the same `CMakeLists.txt` and `CMakePresets.json`.
 
-### Option A: VS Code (day-to-day development)
+### Option A: Visual Studio, Open Folder (recommended)
 
-1. Install the **CMake Tools**, **C/C++** and **clangd** extensions.
-2. Open the folder. When CMake Tools asks for a configure preset, pick **Debug (MSVC, Ninja)**.
-3. Build with F7, or with the Build button in the status bar. Run or debug with Shift+F5 or F5.
-
-**Code completion and errors:** clangd reads `build/debug/compile_commands.json`, as set in `.clangd`, so configure the `debug` preset at least once. `.vscode/settings.json` turns off the C/C++ extension's own IntelliSense so you don't get duplicate errors; that extension is still used for debugging. If you see "cannot open source file GL/glew.h", configure or build once, then run **clangd: Restart language server**.
-
-### Option B: Visual Studio, Open Folder
-
-1. Choose *File → Open → Folder…* and select the project folder.
+1. Choose *File → Open → Folder…* and select the project folder (or a single lab folder under `labs\`).
 2. Pick the **Debug (MSVC, Ninja)** configuration in the toolbar.
-3. Select `my-engine.exe` as the startup item and press F5.
+3. Select the program (for example `my-engine.exe`) as the startup item and press **F5**.
 
-### Option C: Visual Studio solution (.sln / .slnx)
+### Option B: Visual Studio solution (.sln / .slnx)
 
 From a **Developer PowerShell** or **x64 Native Tools** prompt, in the project folder:
 
@@ -41,7 +33,15 @@ cmake --preset vs2026      # VS 2026: build/vs2026/my-engine.slnx
 cmake --preset vs2022      # VS 2022: build/vs2022/my-engine.sln
 ```
 
-Open the generated solution. `my-engine` is already the startup project, and it runs from the project root.
+Open the generated solution and press **F5**. `my-engine` is already the startup project, and it runs from the project root.
+
+### Option C: VS Code (alternative)
+
+1. Install the **CMake Tools**, **C/C++** and **clangd** extensions.
+2. Open the folder. When CMake Tools asks for a configure preset, pick **Debug (MSVC, Ninja)**.
+3. Build with F7, or with the Build button in the status bar. Run or debug with Shift+F5 or F5.
+
+**Code completion and errors:** clangd reads `build/debug/compile_commands.json`, as set in `.clangd`, so configure the `debug` preset at least once. `.vscode/settings.json` turns off the C/C++ extension's own IntelliSense so you don't get duplicate errors; that extension is still used for debugging. If you see "cannot open source file GL/glew.h", configure or build once, then run **clangd: Restart language server**.
 
 ### Command line only
 
@@ -62,6 +62,7 @@ CMakeLists.txt       build configuration (uses the libraries in libraries/)
 CMakePresets.json    shared build presets for VS Code and Visual Studio
 libraries/           GLFW, GLEW and GLM, included with the project
 labs/                one self-contained folder per lab (own CMakeLists.txt, presets and libraries/)
+assignments/         one self-contained folder per assignment (A2 has its own .sln: open it in Visual Studio, not built from the root)
 src/main.cpp         program entry point
 shaders/             GLSL shader files
 assets/              models, textures, etc.

@@ -34,9 +34,3 @@ This folder is **self-contained**: it has its own `CMakeLists.txt` and `CMakePre
 | `scenes.cpp` | One drawing per exercise |
 | `exercises.cpp`, `helpers.cpp` | The same maths and helper functions as `lab2-glm` (whose code is now all in its `main.cpp`), kept here as separate files so this folder stands alone. If the maths changes in `lab2-glm/main.cpp`, update these too |
 | `libraries/` | GLM, GLFW, GLEW |
-
-## Requirements and Windows on ARM
-
-`lab2-visual` asks for **OpenGL 4.6** and, if that isn't available, falls back to **OpenGL 3.3**. Its shaders are written for GLSL 3.30, so it runs on either.
-
-On **Windows on ARM** (Snapdragon), OpenGL comes from Microsoft's **"OpenCL, OpenGL, and Vulkan Compatibility Pack"** (Microsoft Store). If the window still can't be created, the program says so and exits with code 1. Install that pack and try again.

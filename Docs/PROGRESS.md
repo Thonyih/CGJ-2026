@@ -2,6 +2,17 @@
 
 What has been done, newest first.
 
+## 2026-11-16 - Assignment A2: 2D Tangram (Shark)
+- New `assignments/` folder. A1 moved to `assignments/A1-lab10nov/`.
+- Added `labs/hello-2d-world/`: the Lecture 4 example, set up to run in Visual Studio.
+- Added `assignments/A2-tangram/`, built on hello-2d-world with the teacher's `mgl` unchanged:
+  - 3 base shapes (right triangle, square, parallelogram) as buffer objects, made only of counter-clockwise triangles.
+  - All 5 triangles reuse the same base triangle, scaled 1, √2 or 2.
+  - Each piece is placed with `T * R * S` matrices sent as a uniform, and has its own colour uniform.
+  - `Shape` and `Piece` classes. The drawing order doesn't matter.
+- A2 is a standalone Visual Studio delivery: open `A2-tangram.sln` and press F5. There is no CMake. The libraries in `libraries\` are compiled with the program, and all paths are relative.
+- Verified: Debug and Release build with MSBuild. A copy in another folder builds and runs, and the window matches `Docs/Lab/A2/Shark-Color.jpeg`.
+
 ## 2026-11-12 - Assignment A1: exercises 4-6
 - Added to `labs/A1-lab10nov/main.cpp`:
   - Rodrigues rotation in matrix form (each axis rotated by 90° around x, y and z: 9 tests with expected outputs)
