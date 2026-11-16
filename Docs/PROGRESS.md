@@ -10,6 +10,7 @@ What has been done, newest first.
   - All 5 triangles reuse the same base triangle, scaled 1, √2 or 2.
   - Each piece is placed with `T * R * S` matrices sent as a uniform, and has its own colour uniform.
   - `Shape` and `Piece` classes. The drawing order doesn't matter.
+- The sizes follow `Docs/Lab/A2/Tangram-Stock-Sizing.jpeg`: the Tangram square is 1, and the base triangle is the large one (long side 1), scaled 1, √2/2 or ½. Each base shape is made as it sits in the stock square.
 - A2 is a standalone Visual Studio delivery: open `A2-tangram.sln` and press F5. There is no CMake. The libraries in `libraries\` are compiled with the program, and all paths are relative.
 - Verified: Debug and Release build with MSBuild. A copy in another folder builds and runs, and the window matches `Docs/Lab/A2/Shark-Color.jpeg`.
 
