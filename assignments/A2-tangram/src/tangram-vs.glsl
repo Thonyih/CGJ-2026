@@ -1,12 +1,17 @@
 #version 460 core
 
-// Each vertex only has a position. The colour is the same for the whole
-// piece, so it comes from a uniform in the fragment shader.
+// VERTEX SHADER - runs once for every corner (vertex) of the piece being drawn.
+// Its job: decide where the corner goes in clip space (the -1..+1 box).
 
+// INPUT (one per corner, from the VBO): the corner's position (x, y, z, w).
+// It is linked to attribute number 0 in tangram.cpp (POSITION).
 in vec4 inPosition;
 
-uniform mat4 Matrix; // model matrix of the piece (scale, rotation, translation)
+// UNIFORM (the same for every corner of one piece, set by Piece::draw):
+// the piece's model matrix, SCENE * T * R * S (scale, rotate, translate).
+uniform mat4 Matrix;
 
 void main(void) {
+    // Move the corner to its place. gl_Position is OpenGL's built-in output.
     gl_Position = Matrix * inPosition;
 }

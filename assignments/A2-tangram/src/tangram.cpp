@@ -2,64 +2,92 @@
 //
 // Assignment A2 - 2D Tangram: the Shark
 //
-// Built on the Lecture 4 "hello-2d-world" code (same structure, same mgl
-// framework). Draws the 7 Tangram pieces directly in clip space.
+// WHAT THIS PROGRAM DOES
+//   Opens a window and draws the shark from the Pickagram book using the
+//   7 Tangram pieces: 2 large triangles, 1 medium triangle, 2 small
+//   triangles, 1 square and 1 parallelogram. Everything is drawn directly in
+//   clip space (the -1..+1 box that the window shows), in 2D (z = 0).
 //
-// - 3 base shapes, each in its own buffer objects (VAO + VBO + EBO):
-//   a right triangle, a square and a parallelogram, made only of triangles,
-//   with the vertices in counter-clockwise order (right-hand rule).
-// - All 5 triangle pieces reuse the same base right triangle, with a
-//   different scale and colour.
-// - Each piece is placed with its own model matrix:  M = T * R * S
-//   (scale, then rotate, then translate), sent to the shader as a uniform.
-// - Each piece has its own colour, sent to the shader as a uniform.
+// HOW IT IS BUILT
+//   The structure is the same as the Lecture 4 "hello-2d-world" example, and
+//   it uses the teacher's mgl framework (mgl\ folder) without changes:
+//     mgl::Engine opens the window and runs the main loop.
+//     MyApp (below) fills in the callbacks that the engine calls:
+//       initCallback        once, at the start
+//       displayCallback     every frame
+//       windowSizeCallback  when the window is resized
+//       windowCloseCallback once, at the end
+//
+// THE IDEA IN 5 STEPS
+//   1. Only 3 BASE SHAPES are stored on the graphics card (in buffer
+//      objects): a right triangle, a square and a parallelogram. They are
+//      made only of triangles, with the corners in counter-clockwise order.
+//   2. All 5 triangle pieces reuse the SAME base triangle (the large one),
+//      just scaled: 1 for large, sqrt(2)/2 for medium, 1/2 for small.
+//   3. Every piece gets its own MODEL MATRIX  M = T * R * S
+//      (scale, then rotate, then translate - Lecture 2).
+//   4. Every piece gets its own COLOUR.
+//   5. To draw a piece, its matrix and colour are sent to the shaders as
+//      UNIFORMS, then its base shape is drawn.
+//
+// SIZES (from Tangram-Stock-Sizing.jpeg): the whole Tangram square is 1 x 1.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <cstddef>
-#include <memory>
-#include <vector>
+#include <memory> // std::unique_ptr, std::make_unique (used by mgl)
 
 #include "../mgl/mgl.hpp" // IWYU pragma: keep
+// mgl.hpp brings in everything we need: OpenGL (GLEW), GLFW and GLM.
 
-/////////////////////////////////////////////////////////////////////// VERTICES
+///////////////////////////////////////////////////////////////////////////////
+// 1. VERTICES: the corners of the 3 base shapes
+///////////////////////////////////////////////////////////////////////////////
 
-// A vertex only has a position (x, y, z, w). z = 0 because we draw in 2D.
+// A vertex is one corner of a shape. It only has a position:
+//   x, y  where the corner is
+//   z     always 0, because we draw in 2D
+//   w     always 1, which means "this is a point" (homogeneous coordinates,
+//         Lecture 2). w = 1 is what lets a 4x4 matrix MOVE the point.
+// The colour is NOT stored here: it is sent separately for each piece
+// (see section 4), so the same triangle can be drawn in different colours.
 struct Vertex {
   GLfloat XYZW[4];
 };
 
-// Sizes follow Tangram-Stock-Sizing.jpeg: the whole Tangram square is 1 x 1.
-//   large triangle   long side 1, short sides sqrt(2)/2  (base triangle, scale 1)
-//   medium triangle  long side sqrt(2)/2, short sides 1/2 (base triangle, scale sqrt(2)/2)
-//   small triangle   long side 1/2, short sides sqrt(2)/4 (base triangle, scale 1/2)
-//   square           diagonal 1/2, side sqrt(2)/4
-//   parallelogram    sides 1/2 and sqrt(2)/4
+// Every base shape is created exactly as it sits in the stock Tangram square,
+// so all its numbers can be checked against the sizing picture.
+// Each one has a REFERENCE POINT at the origin (0, 0). Placing a piece later
+// means "move that reference point to (x, y)".
 //
-// Each base shape is created the way it sits in the stock Tangram square,
-// with a simple reference point at the origin (0, 0):
-//   triangle: the middle of its long side; square: its centre;
-//   parallelogram: its bottom-left corner.
-// "translate to (x, y)" moves that reference point to (x, y).
+// The corners are listed COUNTER-CLOCKWISE (right-hand rule, Lecture 2).
+// The mgl engine turns on face culling with glFrontFace(GL_CCW): triangles
+// whose corners go clockwise are treated as "facing away" and NOT drawn.
+//
+// INDICES: instead of repeating corners, each triangle is given as 3 corner
+// numbers. The square and the parallelogram have 4 corners and are split
+// into 2 triangles: (0, 1, 2) and (0, 2, 3).
 
-// Right triangle = the LARGE triangle: long side 1 on the x axis,
-// right angle on top at (0, 1/2).
+// --- Right triangle: the LARGE triangle (long side 1) ---
+// Long side on the x axis from -1/2 to 1/2, right angle on top at (0, 1/2).
+// Reference point (+): the middle of the long side.
+// Short sides: sqrt(2)/2. All 5 triangle pieces are this triangle, scaled.
 //
-//       2          2 = (0, 1/2), the right angle
-//     /   \   .
-//   0---+---1      0 = (-1/2, 0), 1 = (1/2, 0), + = origin
+//       2          0 = (-1/2, 0)
+//     /   \   .    1 = ( 1/2, 0)
+//   0---+---1      2 = ( 0,  1/2), the right angle
 const Vertex TriangleVertices[] = {
     {{-0.5f, 0.0f, 0.0f, 1.0f}},
     {{0.5f, 0.0f, 0.0f, 1.0f}},
     {{0.0f, 0.5f, 0.0f, 1.0f}}};
 const GLubyte TriangleIndices[] = {0, 1, 2};
 
-// Square: a diamond with diagonal 1/2, centred on the origin. Two triangles.
+// --- Square: a diamond with diagonal 1/2 (side sqrt(2)/4) ---
+// Reference point (+): the centre.
 //
-//      2           0 = (0, -1/4), 1 = (1/4, 0)
-//    /   \   .     2 = (0, 1/4),  3 = (-1/4, 0)
-//   3  +  1
-//    \   /
+//      2           0 = (0, -1/4)
+//    /   \   .     1 = (1/4, 0)
+//   3  +  1        2 = (0, 1/4)
+//    \   /         3 = (-1/4, 0)
 //      0
 const Vertex SquareVertices[] = {
     {{0.0f, -0.25f, 0.0f, 1.0f}},
@@ -68,11 +96,13 @@ const Vertex SquareVertices[] = {
     {{-0.25f, 0.0f, 0.0f, 1.0f}}};
 const GLubyte SquareIndices[] = {0, 1, 2, 0, 2, 3};
 
-// Parallelogram: long side 1/2 along the bottom, short sides going up and
-// to the right at 45 degrees (as in the stock square). Two triangles.
+// --- Parallelogram: sides 1/2 and sqrt(2)/4 ---
+// Long side 1/2 along the bottom, short sides going up and to the right at
+// 45 degrees, as in the stock square.
+// Reference point: corner 0.
 //
-//      3-------2   0 = (0, 0),     1 = (1/2, 0)
-//     /       /    2 = (3/4, 1/4), 3 = (1/4, 1/4)
+//      3-------2   0 = (0, 0)      1 = (1/2, 0)
+//     /       /    2 = (3/4, 1/4)  3 = (1/4, 1/4)
 //    0-------1
 const Vertex ParallelogramVertices[] = {
     {{0.0f, 0.0f, 0.0f, 1.0f}},
@@ -81,40 +111,63 @@ const Vertex ParallelogramVertices[] = {
     {{0.25f, 0.25f, 0.0f, 1.0f}}};
 const GLubyte ParallelogramIndices[] = {0, 1, 2, 0, 2, 3};
 
-////////////////////////////////////////////////////////////////////////// SHAPE
+///////////////////////////////////////////////////////////////////////////////
+// 2. SHAPE: one base shape stored on the graphics card
+///////////////////////////////////////////////////////////////////////////////
 
-// One base shape stored on the graphics card: its VAO, VBO and EBO.
-// Created once, then drawn as many times as needed.
+// A Shape keeps the 3 OpenGL objects that hold one base shape:
+//   VBO (Vertex Buffer Object)   the list of corners
+//   EBO (Element Buffer Object)  which corners make each triangle
+//   VAO (Vertex Array Object)    remembers the VBO, the EBO and how to read
+//                                them; binding the VAO is enough to draw
+// The data is uploaded ONCE (create) and then drawn every frame (draw).
 class Shape {
 public:
   void create(const Vertex *vertices, GLsizei vertexCount,
               const GLubyte *indices, GLsizei indexCount);
-  void draw() const;
+  void draw();
   void destroy();
 
 private:
-  GLuint VaoId = 0, VboId = 0, EboId = 0;
-  GLsizei IndexCount = 0;
+  GLuint VaoId = 0;       // name (number) of the VAO, given by OpenGL
+  GLuint VboId = 0;       // name of the VBO
+  GLuint EboId = 0;       // name of the EBO
+  GLsizei IndexCount = 0; // how many indices to draw (3 per triangle)
 };
 
-const GLuint POSITION = 0; // attribute index of inPosition
+// Attribute number of "inPosition" in the vertex shader. The shader program
+// links the name "inPosition" to this number (see createShaderProgram).
+const GLuint POSITION = 0;
 
+// Uploads one base shape to the graphics card.
+//   vertices, vertexCount: the corners and how many there are
+//   indices, indexCount:   the corner numbers of each triangle and how many
 void Shape::create(const Vertex *vertices, GLsizei vertexCount,
                    const GLubyte *indices, GLsizei indexCount) {
   IndexCount = indexCount;
 
+  // Create the VAO and make it the current one. Everything set up while it
+  // is bound (the VBO layout and the EBO) is remembered by it.
   glGenVertexArrays(1, &VaoId);
   glBindVertexArray(VaoId);
   {
+    // VBO: copy the corners to the graphics card.
+    // GL_STATIC_DRAW = uploaded once, drawn many times.
     glGenBuffers(1, &VboId);
     glBindBuffer(GL_ARRAY_BUFFER, VboId);
     {
       glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), vertices,
                    GL_STATIC_DRAW);
+
+      // Tell OpenGL how to read one corner for attribute POSITION:
+      // 4 floats (x, y, z, w), not normalized, one Vertex apart, starting at
+      // byte 0 of the buffer.
       glEnableVertexAttribArray(POSITION);
       glVertexAttribPointer(POSITION, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                             reinterpret_cast<GLvoid *>(0));
     }
+
+    // EBO: copy the corner numbers (indices) to the graphics card.
     glGenBuffers(1, &EboId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EboId);
     {
@@ -122,74 +175,112 @@ void Shape::create(const Vertex *vertices, GLsizei vertexCount,
                    indices, GL_STATIC_DRAW);
     }
   }
+  // Unbind everything so later code cannot change this shape by accident.
+  // The VAO is unbound FIRST, so it keeps its link to the EBO.
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Shape::draw() const {
+// Draws the shape with whatever matrix and colour are currently set in the
+// shaders (Piece::draw sets them just before calling this).
+void Shape::draw() {
   glBindVertexArray(VaoId);
+  // Draw triangles using IndexCount indices from the EBO (bytes, starting at
+  // the beginning of the EBO).
   glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_BYTE,
                  reinterpret_cast<GLvoid *>(0));
   glBindVertexArray(0);
 }
 
+// Frees the buffers on the graphics card (called when the window closes).
 void Shape::destroy() {
   glDeleteVertexArrays(1, &VaoId);
   glDeleteBuffers(1, &VboId);
   glDeleteBuffers(1, &EboId);
 }
 
-////////////////////////////////////////////////////////////////////////// PIECE
+///////////////////////////////////////////////////////////////////////////////
+// 3. PIECE: one Tangram piece = a base shape + a colour + a model matrix
+///////////////////////////////////////////////////////////////////////////////
 
-// One Tangram piece: which base shape it uses, its colour and its model
-// matrix. Each piece draws itself on its own, so the drawing order does not
-// matter.
+// A Piece does not own any buffers: it only points to one of the 3 Shapes.
+// That is how the 5 triangle pieces all share the same base triangle.
+//
+// Because every piece sends ITS OWN matrix and colour right before drawing,
+// nothing is left over from the previous piece, so the drawing order does
+// not matter (an assignment requirement).
 class Piece {
 public:
-  Piece(const Shape *shape, glm::vec4 color, glm::mat4 model)
-      : BaseShape(shape), Color(color), Model(model) {}
-
-  void draw(GLint matrixId, GLint colorId) const {
-    glUniformMatrix4fv(matrixId, 1, GL_FALSE, glm::value_ptr(Model));
-    glUniform4fv(colorId, 1, glm::value_ptr(Color));
-    BaseShape->draw();
-  }
+  void set(Shape *shape, glm::vec4 color, glm::mat4 model);
+  void draw(GLint matrixId, GLint colorId);
 
 private:
-  const Shape *BaseShape;
-  glm::vec4 Color;
-  glm::mat4 Model;
+  Shape *BaseShape = nullptr;       // which of the 3 base shapes to draw
+  glm::vec4 Color = glm::vec4(1.0f); // red, green, blue, alpha (0..1)
+  glm::mat4 Model = glm::mat4(1.0f); // where the piece goes (M = T * R * S)
 };
 
-/////////////////////////////////////////////////////////////// TRANSFORMATIONS
+// Stores the piece's shape, colour and model matrix.
+void Piece::set(Shape *shape, glm::vec4 color, glm::mat4 model) {
+  BaseShape = shape;
+  Color = color;
+  Model = model;
+}
 
-const glm::mat4 I(1.0f);
+// Sends this piece's uniforms to the shaders, then draws its base shape.
+//   matrixId: location of the uniform "Matrix" in the shader program
+//   colorId:  location of the uniform "Color"
+void Piece::draw(GLint matrixId, GLint colorId) {
+  // 1 matrix, not transposed (GLM already stores it the way OpenGL wants).
+  glUniformMatrix4fv(matrixId, 1, GL_FALSE, glm::value_ptr(Model));
+  // 1 colour of 4 floats.
+  glUniform4fv(colorId, 1, glm::value_ptr(Color));
+  BaseShape->draw();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// 4. TRANSFORMATIONS AND COLOURS
+///////////////////////////////////////////////////////////////////////////////
+
+const glm::mat4 I(1.0f); // identity matrix (changes nothing)
+
 const float SQRT2 = 1.41421356f;
-const float Q = SQRT2 / 4.0f; // short side of a small triangle (and square side)
+// Q = sqrt(2)/4 = the short side of a small triangle (and the side of the
+// square). The pieces that are turned by 45 degrees end up on multiples of Q.
+const float Q = SQRT2 / 4.0f;
 
-// The shark, with the Tangram square = 1, goes from
-//   x = -1     to  3*sqrt(2)/4 + 1/2   (about 2.56 wide)
-//   y = -Q     to  Q + 1/2             (about 1.21 tall)
-// SCENE moves its centre to (0, 0) and scales it by 0.7, so every point
-// ends up inside clip space [-1, 1] (x within +-0.90, y within +-0.43).
+// SCENE: one extra matrix applied to EVERY piece.
+// With the Tangram square = 1, the shark goes from
+//   x = -1   to  3Q + 1/2   (about 2.56 wide)
+//   y = -Q   to  Q + 1/2    (about 1.21 tall)
+// which does not fit in clip space (2 x 2). SCENE first moves the shark's
+// centre (3Q/2 - 1/4, 1/4) to (0, 0), then scales everything by 0.7.
+// Result: x within +-0.90 and y within +-0.42, inside [-1, 1].
 const glm::mat4 SCENE =
     glm::scale(I, glm::vec3(0.7f, 0.7f, 1.0f)) *
     glm::translate(I, glm::vec3(0.25f - 1.5f * Q, -0.25f, 0.0f));
 
-// Model matrix of one piece: first scale it, then rotate it around the
-// origin (its reference point), then move that point to (x, y).
+// Builds the model matrix of one piece:  SCENE * T * R * S
+// Read it RIGHT TO LEFT - this is the order the steps happen to each corner:
+//   S: scale the base shape by "size" (z is left at 1)
+//   R: rotate it by "angleDegrees" around the z axis (counter-clockwise),
+//      around its reference point, which is still at (0, 0)
+//   T: move the reference point to (x, y)
+//   SCENE: fit the whole shark into clip space
+// Order matters (Lecture 2: RS != SR, TR != RT). Rotating AFTER moving would
+// swing the piece around (0, 0) like a door on a hinge.
 glm::mat4 modelMatrix(float x, float y, float angleDegrees, float size) {
   glm::mat4 T = glm::translate(I, glm::vec3(x, y, 0.0f));
+  // glm::rotate wants radians, so the angle is converted from degrees.
   glm::mat4 R =
       glm::rotate(I, glm::radians(angleDegrees), glm::vec3(0.0f, 0.0f, 1.0f));
   glm::mat4 S = glm::scale(I, glm::vec3(size, size, 1.0f));
   return SCENE * T * R * S;
 }
 
-//////////////////////////////////////////////////////////////////////// COLOURS
-
-// Same colours as the Tangram pictures given with the assignment.
+// One colour per piece (red, green, blue, alpha), the same colours as the
+// Tangram pictures given with the assignment.
 const glm::vec4 BLUE(0.07f, 0.51f, 0.94f, 1.0f);
 const glm::vec4 MAGENTA(0.80f, 0.06f, 0.39f, 1.0f);
 const glm::vec4 TEAL(0.00f, 0.61f, 0.65f, 1.0f);
@@ -198,24 +289,36 @@ const glm::vec4 GREEN(0.14f, 0.67f, 0.14f, 1.0f);
 const glm::vec4 ORANGE(1.00f, 0.55f, 0.00f, 1.0f);
 const glm::vec4 PURPLE(0.43f, 0.23f, 0.75f, 1.0f);
 
-////////////////////////////////////////////////////////////////////////// MYAPP
+///////////////////////////////////////////////////////////////////////////////
+// 5. MYAPP: the application (same structure as hello-2d-world)
+///////////////////////////////////////////////////////////////////////////////
+
+const int NUMBER_OF_PIECES = 7;
 
 class MyApp : public mgl::App {
 public:
   MyApp() = default;
   ~MyApp() override = default;
 
+  // Callbacks called by mgl::Engine.
   void initCallback(GLFWwindow *win) override;
   void displayCallback(GLFWwindow *win, double elapsed) override;
   void windowCloseCallback(GLFWwindow *win) override;
   void windowSizeCallback(GLFWwindow *win, int width, int height) override;
 
 private:
+  // The shader program (vertex shader + fragment shader).
   std::unique_ptr<mgl::ShaderProgram> Shaders = nullptr;
-  GLint MatrixId = -1, ColorId = -1;
+  GLint MatrixId = -1; // location of the uniform "Matrix"
+  GLint ColorId = -1;  // location of the uniform "Color"
 
-  Shape Triangle, Square, Parallelogram; // the 3 base shapes
-  std::vector<Piece> Pieces;             // the 7 Tangram pieces
+  // The 3 base shapes (on the graphics card).
+  Shape Triangle;
+  Shape Square;
+  Shape Parallelogram;
+
+  // The 7 Tangram pieces.
+  Piece Pieces[NUMBER_OF_PIECES];
 
   void createShaderProgram();
   void createBufferObjects();
@@ -224,25 +327,36 @@ private:
   void drawScene();
 };
 
-//////////////////////////////////////////////////////////////////////// SHADERs
+/////////////////////////////////////////////////////////////////////// SHADERS
 
+// Builds the shader program from the two .glsl files in src\.
+// (They are opened by file name, so the program must run from src\ -
+// Visual Studio's F5 does that, see the project settings.)
 void MyApp::createShaderProgram() {
   Shaders = std::make_unique<mgl::ShaderProgram>();
   Shaders->addShader(GL_VERTEX_SHADER, "tangram-vs.glsl");
   Shaders->addShader(GL_FRAGMENT_SHADER, "tangram-fs.glsl");
 
+  // Link the shader input "inPosition" to attribute number POSITION (0),
+  // the number used in Shape::create.
   Shaders->addAttribute(mgl::POSITION_ATTRIBUTE, POSITION);
+
+  // The two uniforms we will set for every piece.
   Shaders->addUniform("Matrix");
   Shaders->addUniform("Color");
 
+  // Compile and link the program.
   Shaders->create();
 
+  // Ask where each uniform lives, so Piece::draw can set it.
   MatrixId = Shaders->Uniforms["Matrix"].index;
   ColorId = Shaders->Uniforms["Color"].index;
 }
 
-//////////////////////////////////////////////////////////////////// VAOs & VBOs
+///////////////////////////////////////////////////////////////// VAOs & VBOs
 
+// Uploads the 3 base shapes: (corners, number of corners, indices, number of
+// indices). 1 triangle = 3 indices; 2 triangles = 6 indices.
 void MyApp::createBufferObjects() {
   Triangle.create(TriangleVertices, 3, TriangleIndices, 3);
   Square.create(SquareVertices, 4, SquareIndices, 6);
@@ -255,50 +369,57 @@ void MyApp::destroyBufferObjects() {
   Parallelogram.destroy();
 }
 
-///////////////////////////////////////////////////////////////////////// PIECES
+//////////////////////////////////////////////////////////////////////// PIECES
 
-// Where each piece goes (Tangram square = 1).
-// (x, y) is where the base shape's reference point ends up.
-// The origin (0, 0) of the shark is the middle of the magenta body's long side.
-// Angles are counter-clockwise; scale 1 / sqrt(2)/2 / 1/2 = large / medium / small.
+// Places the 7 pieces of the shark.
+//   modelMatrix(x, y, angle, scale):
+//     (x, y)  where the base shape's reference point goes
+//     angle   in degrees, counter-clockwise (negative = clockwise)
+//     scale   1 = large, sqrt(2)/2 = medium, 1/2 = small triangle
+// The shark's own origin (0, 0) is the middle of the magenta body's long side.
+// Every position was checked by working out the moved corners by hand.
 void MyApp::createPieces() {
-  // Head: large triangle, as in the stock square (long side flat at y = 0).
-  Pieces.push_back(Piece(&Triangle, BLUE,
-                         modelMatrix(-0.5f, 0.0f, 0.0f, 1.0f)));
-  // Body: large triangle, turned 45 degrees clockwise.
-  Pieces.push_back(Piece(&Triangle, MAGENTA,
-                         modelMatrix(0.0f, 0.0f, -45.0f, 1.0f)));
-  // Top fin: small triangle on top of the body.
-  Pieces.push_back(Piece(&Triangle, TEAL,
-                         modelMatrix(0.5f * Q, 1.5f * Q, -135.0f, 0.5f)));
-  // Lower fin: small triangle under the head, upside down.
-  Pieces.push_back(Piece(&Triangle, RED,
-                         modelMatrix(-0.25f, 0.0f, 180.0f, 0.5f)));
-  // Middle of the body: square, turned so its sides are level.
-  Pieces.push_back(Piece(&Square, GREEN,
-                         modelMatrix(1.5f * Q, 0.5f * Q, 45.0f, 1.0f)));
-  // Tail stalk: parallelogram, going up to the right.
-  Pieces.push_back(Piece(&Parallelogram, ORANGE,
-                         modelMatrix(2.0f * Q, 0.0f, 45.0f, 1.0f)));
-  // Tail: medium triangle.
-  Pieces.push_back(Piece(&Triangle, PURPLE,
-                         modelMatrix(3.0f * Q + 0.25f, Q + 0.25f, 135.0f,
-                                     SQRT2 / 2.0f)));
+  // 0. Head: large triangle, exactly as in the stock square (long side level).
+  Pieces[0].set(&Triangle, BLUE, modelMatrix(-0.5f, 0.0f, 0.0f, 1.0f));
+
+  // 1. Body: large triangle, turned 45 degrees clockwise, so its right angle
+  //    points up and to the right.
+  Pieces[1].set(&Triangle, MAGENTA, modelMatrix(0.0f, 0.0f, -45.0f, 1.0f));
+
+  // 2. Top fin: small triangle (scale 1/2) sitting on top of the body.
+  Pieces[2].set(&Triangle, TEAL,
+                modelMatrix(0.5f * Q, 1.5f * Q, -135.0f, 0.5f));
+
+  // 3. Lower fin: small triangle (scale 1/2) under the head, upside down.
+  Pieces[3].set(&Triangle, RED, modelMatrix(-0.25f, 0.0f, 180.0f, 0.5f));
+
+  // 4. Middle of the body: square, turned 45 degrees so its sides are level.
+  Pieces[4].set(&Square, GREEN, modelMatrix(1.5f * Q, 0.5f * Q, 45.0f, 1.0f));
+
+  // 5. Tail stalk: parallelogram, turned 45 degrees so it goes up to the right.
+  Pieces[5].set(&Parallelogram, ORANGE,
+                modelMatrix(2.0f * Q, 0.0f, 45.0f, 1.0f));
+
+  // 6. Tail: medium triangle (scale sqrt(2)/2).
+  Pieces[6].set(&Triangle, PURPLE,
+                modelMatrix(3.0f * Q + 0.25f, Q + 0.25f, 135.0f,
+                            SQRT2 / 2.0f));
 }
 
-////////////////////////////////////////////////////////////////////////// SCENE
+///////////////////////////////////////////////////////////////////////// SCENE
 
+// Draws all the pieces, directly in clip space.
 void MyApp::drawScene() {
-  // Drawing directly in clip space
-  Shaders->bind();
-  for (const Piece &piece : Pieces) {
-    piece.draw(MatrixId, ColorId);
+  Shaders->bind(); // use our shader program
+  for (int i = 0; i < NUMBER_OF_PIECES; i++) {
+    Pieces[i].draw(MatrixId, ColorId);
   }
   Shaders->unbind();
 }
 
-////////////////////////////////////////////////////////////////////// CALLBACKS
+///////////////////////////////////////////////////////////////////// CALLBACKS
 
+// Called once, after the window and OpenGL are ready.
 void MyApp::initCallback(GLFWwindow *win [[maybe_unused]]) {
   glClearColor(0.96f, 0.96f, 0.96f, 1.0f); // light grey, like the picture
   createBufferObjects();
@@ -306,14 +427,16 @@ void MyApp::initCallback(GLFWwindow *win [[maybe_unused]]) {
   createPieces();
 }
 
+// Called once, when the window is closed.
 void MyApp::windowCloseCallback(GLFWwindow *win [[maybe_unused]]) {
   destroyBufferObjects();
 }
 
-// Called by mgl when the window is resized (after it sets the viewport to the
-// whole window). Clip space is a square (-1..+1), so if the viewport is not
-// square the shark gets stretched. Use the biggest square that fits instead,
-// centred in the window: the shark keeps its shape and just grows or shrinks.
+// Called when the window is resized, right after mgl has set the viewport to
+// the whole window. Clip space is a square (-1..+1), so a non-square viewport
+// would stretch the shark. Instead, use the biggest square that fits in the
+// window, centred: the shark keeps its shape and just grows or shrinks.
+//   glViewport(left, bottom, width, height), in pixels.
 void MyApp::windowSizeCallback(GLFWwindow *win [[maybe_unused]], int width,
                                int height) {
   int size = width;
@@ -323,21 +446,24 @@ void MyApp::windowSizeCallback(GLFWwindow *win [[maybe_unused]], int width,
   glViewport((width - size) / 2, (height - size) / 2, size, size);
 }
 
+// Called every frame. The engine has already cleared the screen; after this
+// it swaps the back and front buffers (double buffering, Lecture 4).
 void MyApp::displayCallback(GLFWwindow *win [[maybe_unused]],
                             double elapsed [[maybe_unused]]) {
   drawScene();
 }
 
-/////////////////////////////////////////////////////////////////////////// MAIN
+////////////////////////////////////////////////////////////////////////// MAIN
 
 int main() {
   mgl::Engine &engine = mgl::Engine::getInstance();
   engine.setApp(std::make_unique<MyApp>());
-  engine.setOpenGL(4, 6);
+  engine.setOpenGL(4, 6); // OpenGL 4.6 core
+  // 600 x 600 window, title, not fullscreen (0), v-sync on (1).
   engine.setWindow(600, 600, "2D Tangram - Shark", 0, 1);
-  engine.init();
-  engine.run();
+  engine.init(); // creates the window, then calls initCallback
+  engine.run();  // main loop: displayCallback every frame until closed
   return EXIT_SUCCESS;
 }
 
-//////////////////////////////////////////////////////////////////////////// END
+////////////////////////////////////////////////////////////////////////// END
