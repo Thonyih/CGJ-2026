@@ -32,12 +32,36 @@
 //
 // SIZES (from Tangram-Stock-Sizing.jpeg): the whole Tangram square is 1 x 1.
 //
+// TO SEE EACH STEP of T * R * S: change the STEP setting just below the
+// #include lines (0, 1, 2 or 3), then restart the program.
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <memory> // std::unique_ptr, std::make_unique (used by mgl)
 
 #include "../mgl/mgl.hpp" // IWYU pragma: keep
 // mgl.hpp brings in everything we need: OpenGL (GLEW), GLFW and GLM.
+
+// ============================================================================
+//  STEP
+// ----------------------------------------------------------------------------
+//  Shows the pieces part-way through  M = T * R * S,  to see what each
+//  matrix does. To use it:
+//    1. change the number on the  const int STEP  line below
+//    2. stop the program (Shift+F5) and start it again (F5)
+//
+//    STEP = 0   the base shapes exactly as written in section 1, no matrix:
+//               every piece starts at (0, 0), so they lie on top of each other
+//    STEP = 1   + scale:  each piece gets its size (large, medium, small)
+//    STEP = 2   + rotate: each piece turns around its corner 0
+//    STEP = 3   + translate: every piece moves to its place = THE SHARK
+//
+//  Steps 0, 1 and 2 draw only the outlines (so pieces on top of each other
+//  stay visible) and keep (0, 0) in the middle of the window.
+//
+//  >>> Keep STEP = 3 for the finished assignment. <<<
+// ============================================================================
+const int STEP = 3; // <-- CHANGE THIS NUMBER: 0, 1, 2 or 3
 
 ///////////////////////////////////////////////////////////////////////////////
 // 1. VERTICES: the corners of the 3 base shapes
@@ -54,8 +78,15 @@ struct Vertex {
   GLfloat XYZW[4];
 };
 
-// Every base shape is created exactly as it sits in the stock Tangram square,
-// so all its numbers can be checked against the sizing picture.
+// Each base shape has the same tilt as one piece in the stock Tangram square
+// (Tangram-Stock-Sizing.jpeg), so its sizes can be checked against that
+// picture and its corners are simple halves and quarters:
+//   - the parallelogram is the orange piece (exactly the same corners)
+//   - the square is the green diamond
+//   - the triangle is tilted like the teal piece, but at the LARGE size
+//     (long side 1); the matrix scales it down for the medium and small ones.
+// Any other tilt would also work: the rotation in the model matrix turns each
+// piece to the angle it needs in the shark.
 //
 // ONE RULE FOR ALL 3 SHAPES: corner 0 is at the origin (0, 0), and the other
 // corners follow counter-clockwise. Corner 0 is the shape's REFERENCE POINT:
@@ -66,9 +97,23 @@ struct Vertex {
 // The mgl engine turns on face culling with glFrontFace(GL_CCW): triangles
 // whose corners go clockwise are treated as "facing away" and NOT drawn.
 //
-// INDICES: instead of repeating corners, each triangle is given as 3 corner
-// numbers. The square and the parallelogram have 4 corners and are split
-// into 2 triangles: (0, 1, 2) and (0, 2, 3).
+// INDICES: each shape has TWO arrays:
+//   ...Vertices[]  the corners. A corner's INDEX is its position in this
+//                  array: the first corner is index 0, the next index 1, ...
+//   ...Indices[]   which corners make each triangle, as index numbers,
+//                  read in groups of 3 (one group = one triangle).
+// Example: TriangleIndices = {0, 1, 2} means "one triangle, from corner 0
+// to corner 1 to corner 2". The order inside each group is counter-clockwise.
+//
+// Why bother? Shapes can SHARE corners. The square and the parallelogram have
+// 4 corners but are drawn as 2 triangles, {0, 1, 2} and {0, 2, 3}: corners 0
+// and 2 are used by both triangles but stored only once (4 corners instead
+// of 6).
+//
+// GLubyte = OpenGL's name for an unsigned byte (a whole number 0..255),
+// plenty for corner numbers. It must match GL_UNSIGNED_BYTE in
+// glDrawElements (Shape::draw). The indices are uploaded to the graphics card
+// in the EBO (Shape::create). Same type as the teacher's hello-2d-world.
 
 // --- Right triangle: the LARGE triangle (long side 1) ---
 // Long side on the x axis from (0, 0) to (1, 0), right angle on top.
@@ -79,10 +124,11 @@ struct Vertex {
 //     /   \   .    1 = (1, 0)
 //   0-------1      2 = (1/2, 1/2), the right angle
 const Vertex TriangleVertices[] = {
-    {{0.0f, 0.0f, 0.0f, 1.0f}},
-    {{1.0f, 0.0f, 0.0f, 1.0f}},
-    {{0.5f, 0.5f, 0.0f, 1.0f}}};
-const GLubyte TriangleIndices[] = {0, 1, 2};
+    {{0.0f, 0.0f, 0.0f, 1.0f}},  // index 0 -> corner (0, 0)
+    {{1.0f, 0.0f, 0.0f, 1.0f}},  // index 1 -> corner (1, 0)
+    {{0.5f, 0.5f, 0.0f, 1.0f}}}; // index 2 -> corner (1/2, 1/2)
+// 3 corners, 1 triangle = 3 indices.
+const GLubyte TriangleIndices[] = {0, 1, 2}; // the triangle: corner 0 -> 1 -> 2 (counter-clockwise)
 
 // --- Square: a diamond with diagonal 1/2 (side sqrt(2)/4) ---
 // Reference point: corner 0, the bottom corner.
@@ -93,11 +139,15 @@ const GLubyte TriangleIndices[] = {0, 1, 2};
 //    \   /         3 = (-1/4, 1/4)
 //      0
 const Vertex SquareVertices[] = {
-    {{0.0f, 0.0f, 0.0f, 1.0f}},
-    {{0.25f, 0.25f, 0.0f, 1.0f}},
-    {{0.0f, 0.5f, 0.0f, 1.0f}},
-    {{-0.25f, 0.25f, 0.0f, 1.0f}}};
-const GLubyte SquareIndices[] = {0, 1, 2, 0, 2, 3};
+    {{0.0f, 0.0f, 0.0f, 1.0f}},    // index 0 -> corner (0, 0), bottom
+    {{0.25f, 0.25f, 0.0f, 1.0f}},  // index 1 -> corner (1/4, 1/4), right
+    {{0.0f, 0.5f, 0.0f, 1.0f}},    // index 2 -> corner (0, 1/2), top
+    {{-0.25f, 0.25f, 0.0f, 1.0f}}}; // index 3 -> corner (-1/4, 1/4), left
+// 4 corners, 2 triangles = 6 indices. The square is cut along the line from
+// corner 0 to corner 2, so both triangles use corners 0 and 2.
+const GLubyte SquareIndices[] = {
+    0, 1, 2,  // triangle 1, the right half: corner 0 -> 1 -> 2
+    0, 2, 3}; // triangle 2, the left half:  corner 0 -> 2 -> 3
 
 // --- Parallelogram: sides 1/2 and sqrt(2)/4 ---
 // Long side 1/2 along the bottom, short sides going up and to the right at
@@ -108,11 +158,15 @@ const GLubyte SquareIndices[] = {0, 1, 2, 0, 2, 3};
 //     /       /    2 = (3/4, 1/4)  3 = (1/4, 1/4)
 //    0-------1
 const Vertex ParallelogramVertices[] = {
-    {{0.0f, 0.0f, 0.0f, 1.0f}},
-    {{0.5f, 0.0f, 0.0f, 1.0f}},
-    {{0.75f, 0.25f, 0.0f, 1.0f}},
-    {{0.25f, 0.25f, 0.0f, 1.0f}}};
-const GLubyte ParallelogramIndices[] = {0, 1, 2, 0, 2, 3};
+    {{0.0f, 0.0f, 0.0f, 1.0f}},    // index 0 -> corner (0, 0), bottom left
+    {{0.5f, 0.0f, 0.0f, 1.0f}},    // index 1 -> corner (1/2, 0), bottom right
+    {{0.75f, 0.25f, 0.0f, 1.0f}},  // index 2 -> corner (3/4, 1/4), top right
+    {{0.25f, 0.25f, 0.0f, 1.0f}}}; // index 3 -> corner (1/4, 1/4), top left
+// 4 corners, 2 triangles = 6 indices. The parallelogram is cut along the line
+// from corner 0 to corner 2, so both triangles use corners 0 and 2.
+const GLubyte ParallelogramIndices[] = {
+    0, 1, 2,  // triangle 1, bottom-right half: corner 0 -> 1 -> 2
+    0, 2, 3}; // triangle 2, top-left half:     corner 0 -> 2 -> 3
 
 ///////////////////////////////////////////////////////////////////////////////
 // 2. SHAPE: one base shape stored on the graphics card
@@ -170,7 +224,10 @@ void Shape::create(const Vertex *vertices, GLsizei vertexCount,
                             reinterpret_cast<GLvoid *>(0));
     }
 
-    // EBO: copy the corner numbers (indices) to the graphics card.
+    // EBO: copy the corner numbers (indices) to the graphics card, e.g.
+    // {0, 1, 2, 0, 2, 3} for the square. Each index is 1 byte (GLubyte), so
+    // the size is indexCount * sizeof(GLubyte) bytes. Because the VAO is
+    // bound, it remembers this EBO.
     glGenBuffers(1, &EboId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EboId);
     {
@@ -189,8 +246,13 @@ void Shape::create(const Vertex *vertices, GLsizei vertexCount,
 // shaders (Piece::draw sets them just before calling this).
 void Shape::draw() {
   glBindVertexArray(VaoId);
-  // Draw triangles using IndexCount indices from the EBO (bytes, starting at
-  // the beginning of the EBO).
+  // Draw triangles using the indices in the EBO:
+  //   GL_TRIANGLES      read the indices in groups of 3; each group is one
+  //                     triangle, e.g. {0, 2, 3} = corners 0, 2 and 3
+  //   IndexCount        how many indices (3 for the triangle, 6 for the
+  //                     square and the parallelogram)
+  //   GL_UNSIGNED_BYTE  each index is a GLubyte (must match the arrays)
+  //   0                 start at the beginning of the EBO
   glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_BYTE,
                  reinterpret_cast<GLvoid *>(0));
   glBindVertexArray(0);
@@ -212,7 +274,7 @@ void Shape::destroy() {
 //
 // Because every piece sends ITS OWN matrix and colour right before drawing,
 // nothing is left over from the previous piece, so the drawing order does
-// not matter (an assignment requirement).
+// not matter (assignment requirement).
 class Piece {
 public:
   void set(Shape *shape, glm::vec4 color, glm::mat4 model);
@@ -276,10 +338,20 @@ const glm::mat4 SCENE =
 glm::mat4 modelMatrix(float x, float y, float angleDegrees, float size) {
   glm::mat4 T = glm::translate(I, glm::vec3(x, y, 0.0f));
   // glm::rotate wants radians, so the angle is converted from degrees.
-  glm::mat4 R =
-      glm::rotate(I, glm::radians(angleDegrees), glm::vec3(0.0f, 0.0f, 1.0f));
+  glm::mat4 R = glm::rotate(I, glm::radians(angleDegrees), glm::vec3(0.0f, 0.0f, 1.0f));
   glm::mat4 S = glm::scale(I, glm::vec3(size, size, 1.0f));
-  return SCENE * T * R * S;
+
+  // STEP setting (top of the file): stop part-way to see each matrix.
+  if (STEP == 0) {
+    return I; // no matrix: the corners stay exactly as in section 1
+  }
+  if (STEP == 1) {
+    return S; // only scale
+  }
+  if (STEP == 2) {
+    return R * S; // scale, then rotate around corner 0
+  }
+  return SCENE * T * R * S; // STEP 3: everything = the finished shark
 }
 
 // One colour per piece (red, green, blue, alpha), the same colours as the
@@ -293,7 +365,7 @@ const glm::vec4 ORANGE(1.00f, 0.55f, 0.00f, 1.0f);
 const glm::vec4 PURPLE(0.43f, 0.23f, 0.75f, 1.0f);
 
 ///////////////////////////////////////////////////////////////////////////////
-// 5. MYAPP: the application (same structure as hello-2d-world)
+// 5. MYAPP: the application (structure of hello-2d-world)
 ///////////////////////////////////////////////////////////////////////////////
 
 const int NUMBER_OF_PIECES = 7;
@@ -359,7 +431,10 @@ void MyApp::createShaderProgram() {
 ///////////////////////////////////////////////////////////////// VAOs & VBOs
 
 // Uploads the 3 base shapes: (corners, number of corners, indices, number of
-// indices). 1 triangle = 3 indices; 2 triangles = 6 indices.
+// indices). The numbers are the sizes of the arrays in section 1:
+//   triangle:      3 corners, 1 triangle  = 3 indices {0, 1, 2}
+//   square:        4 corners, 2 triangles = 6 indices {0, 1, 2, 0, 2, 3}
+//   parallelogram: 4 corners, 2 triangles = 6 indices {0, 1, 2, 0, 2, 3}
 void MyApp::createBufferObjects() {
   Triangle.create(TriangleVertices, 3, TriangleIndices, 3);
   Square.create(SquareVertices, 4, SquareIndices, 6);
@@ -381,29 +456,41 @@ void MyApp::destroyBufferObjects() {
 //     scale   1 = large, sqrt(2)/2 = medium, 1/2 = small triangle
 // The shark's own origin (0, 0) is the head's right corner (where the head,
 // the lower fin and the body meet).
-// Every position was checked by working out the moved corners by hand.
+//
+// Think of each piece as a cardboard cut-out with a pin through corner 0:
+// scale and rotate happen around the pin, then translate moves the pin to
+// (x, y). The other corners just come along. The "Corners end at" line under
+// each piece lists where every corner lands in the shark (worked out by hand;
+// see also explanation/A2-every-corner.png).
 void MyApp::createPieces() {
   // 0. Head: large triangle, exactly as in the stock square (long side level).
+  //    Corners end at: 0 -> (-1, 0)   1 -> (0, 0)   2 -> (-1/2, 1/2)
   Pieces[0].set(&Triangle, BLUE, modelMatrix(-1.0f, 0.0f, 0.0f, 1.0f));
 
   // 1. Body: large triangle, turned 45 degrees clockwise, so its right angle
   //    points up and to the right.
+  //    Corners end at: 0 -> (-Q, Q)   1 -> (Q, -Q)   2 -> (Q, Q)
   Pieces[1].set(&Triangle, MAGENTA, modelMatrix(-Q, Q, -45.0f, 1.0f));
 
   // 2. Top fin: small triangle (scale 1/2) sitting on top of the body.
+  //    Corners end at: 0 -> (Q, 2Q)   1 -> (0, Q)   2 -> (Q, Q)
   Pieces[2].set(&Triangle, TEAL, modelMatrix(Q, 2.0f * Q, -135.0f, 0.5f));
 
   // 3. Lower fin: small triangle (scale 1/2) under the head, upside down.
+  //    Corners end at: 0 -> (0, 0)   1 -> (-1/2, 0)   2 -> (-1/4, -1/4)
   Pieces[3].set(&Triangle, RED, modelMatrix(0.0f, 0.0f, 180.0f, 0.5f));
 
   // 4. Middle of the body: square, turned 45 degrees so its sides are level.
+  //    Corners end at: 0 -> (2Q, 0)   1 -> (2Q, Q)   2 -> (Q, Q)   3 -> (Q, 0)
   Pieces[4].set(&Square, GREEN, modelMatrix(2.0f * Q, 0.0f, 45.0f, 1.0f));
 
   // 5. Tail stalk: parallelogram, turned 45 degrees so it goes up to the right.
+  //    Corners end at: 0 -> (2Q, 0)   1 -> (3Q, Q)   2 -> (3Q, 2Q)   3 -> (2Q, Q)
   Pieces[5].set(&Parallelogram, ORANGE,
                 modelMatrix(2.0f * Q, 0.0f, 45.0f, 1.0f));
 
   // 6. Tail: medium triangle (scale sqrt(2)/2).
+  //    Corners end at: 0 -> (3Q + 1/2, Q)   1 -> (3Q, Q + 1/2)   2 -> (3Q, Q)
   Pieces[6].set(&Triangle, PURPLE,
                 modelMatrix(3.0f * Q + 0.5f, Q, 135.0f, SQRT2 / 2.0f));
 }
@@ -424,6 +511,10 @@ void MyApp::drawScene() {
 // Called once, after the window and OpenGL are ready.
 void MyApp::initCallback(GLFWwindow *win [[maybe_unused]]) {
   glClearColor(0.96f, 0.96f, 0.96f, 1.0f); // light grey, like the picture
+  if (STEP < 3) {
+    // STEP setting (top of the file): draw only the edges of each triangle.
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  }
   createBufferObjects();
   createShaderProgram();
   createPieces();

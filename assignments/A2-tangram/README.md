@@ -32,6 +32,25 @@ That's all. You need the *Desktop development with C++* workload, and nothing el
 | Drawing order doesn't matter | Each `Piece::draw` sets its own matrix and colour. The pieces don't overlap |
 | Unique colour per piece | Uniform `Color` in `tangram-fs.glsl`, so one base shape can have any colour. The colours match the assignment's Tangram pictures |
 
+## Seeing each step: the `STEP` setting
+
+Near the top of `src/tangram.cpp`, in the box marked **SETTING YOU CAN CHANGE**:
+
+```cpp
+const int STEP = 3; // <-- CHANGE THIS NUMBER: 0, 1, 2 or 3
+```
+
+Change the number, then stop (Shift+F5) and start (F5) the program:
+
+| STEP | What you see |
+|---|---|
+| 0 | The base shapes exactly as written in the code, with no matrix: every piece starts at (0, 0) |
+| 1 | + scale: each piece has its size |
+| 2 | + rotate: each piece turned around its corner 0 |
+| 3 | + translate: the finished shark (**keep this for the delivery**) |
+
+Steps 0–2 draw outlines only, so pieces lying on top of each other stay visible, and keep (0, 0) in the middle of the window.
+
 ## Resizing the window
 
 mgl sets the viewport to the whole window when it is resized, which would stretch the square clip space and distort the shark. `MyApp::windowSizeCallback` then sets the viewport to the biggest square that fits, centred, so the shark keeps its shape at any window size.
