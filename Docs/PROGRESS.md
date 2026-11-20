@@ -2,6 +2,24 @@
 
 What has been done, newest first.
 
+## 2026-11-20 - New course material: Lectures 5-6 and Assignment A3
+- Added to `Docs/`:
+  - `Lectures/5-Viewing-Pipeline/`: handouts + `03-hello-3d-world` (3D, cameras: mgl now has `mglCamera`)
+  - `Lectures/6-Geometry-management/`: handouts + `04-mesh-loader` (meshes loaded from `.obj` files with **Assimp**: mgl now has `mglMesh` and `mglScenegraph`) + Blender assets
+  - `Assignments/A3/AssignmentA3.pdf`: A3 Pickagram
+- A3 asks for:
+  - **Geometry:** 3D pieces from Blender, loaded with Assimp; a colour per piece and a different tint per face; a scene graph (mesh + shader + model matrix per node, children follow parents); the pieces on a tabletop that moves with a left-mouse drag.
+  - **Animation:** a second "closed box" configuration on another plane; the left/right arrows animate between the two, can stop halfway and reverse.
+  - **Camera:** 2 orbiting cameras (right-mouse drag, scroll to zoom), quaternions, `c` switches camera, `p` switches orthographic/perspective, no stretching on resize.
+- Not started yet. **To do first:** add Assimp to the libraries (it isn't in `libraries/` yet) and get `04-mesh-loader` running in Visual Studio.
+
+## 2026-11-18 - Assignment A2: delivered version (`assignments/A2-tangram-clean/`)
+- Rebuilt A2 step by step, starting from the lecture's hello-2d-world, to understand each part. This is the version handed in (`A2-CGJ-Grupo3.zip`).
+- One `Vertex` = position only. Colour is a `Color` uniform sent before each draw, so the 5 triangle pieces share one triangle buffer.
+- `Shape` class (VAO + VBO + EBO, `create` / `draw` / `destroy`) and `Piece` class (shape + colour + x, y, angle, size). The 7 pieces are a list, drawn in a loop.
+- `modelMatrix(x, y, angle, size)` = `Aspect * SCENE * T * R * S`. `SCENE` fits the shark in the window. `Aspect` is updated in `windowSizeCallback` so the shark isn't stretched when the window is resized.
+- Verified: builds in Visual Studio and shows the full shark.
+
 ## 2026-11-16 - Assignment A2: 2D Tangram (Shark)
 - New `assignments/` folder. A1 moved to `assignments/A1-lab10nov/`.
 - Added `labs/hello-2d-world/`: the Lecture 4 example, set up to run in Visual Studio.
