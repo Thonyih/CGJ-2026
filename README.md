@@ -10,5 +10,6 @@ See [INSTRUCTIONS.md](INSTRUCTIONS.md) for how to build and run the project.
 | `labs/hello-2d-world/` | Lecture 4 example (mgl framework), start of A2 ([README](labs/hello-2d-world/README.md)) |
 | `assignments/A1-lab10nov/` | Assignment A1, exercises 1-6 ([README](assignments/A1-lab10nov/README.md)) |
 | `assignments/A2-tangram/` | Assignment A2, 2D Tangram shark (first version, fully commented). Visual Studio only: open `A2-tangram.sln` ([README](assignments/A2-tangram/README.md)) |
+| `assignments/A3-pickagram/` | Assignment A3, 3D Pickagram (Blender meshes, Assimp, scene graph, quaternion cameras, box ↔ shark animation). Visual Studio only: open `A3-pickagram.sln` ([README](assignments/A3-pickagram/README.md)) |
 | `assignments/A2-tangram-clean/` | Assignment A2, **delivered version** (group 3), rebuilt step by step from the lecture's hello-2d-world. Visual Studio only: open `A2-tangram-clean.sln` |
 | `Docs/PROGRESS.md` | Progress log |

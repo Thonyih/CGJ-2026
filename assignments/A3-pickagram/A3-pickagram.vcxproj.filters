@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{F4B3DD3C-5327-4AD2-95CB-FEC23BC24198}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{C3D23C79-FC85-472D-93CC-C1E5E5F13B48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{A620C5FA-AD5E-4874-B922-A1B9151BD493}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mgl">
+      <UniqueIdentifier>{BD1F1B4B-68B8-4A7C-AA32-2764271890E3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries">
+      <UniqueIdentifier>{279E82FF-255F-41B0-A70E-EC7843BE1773}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\glew">
+      <UniqueIdentifier>{7E68CE8A-FB50-450E-B91C-EE8A3DD5C3C5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\glfw">
+      <UniqueIdentifier>{DCC99640-CB07-4995-BA0F-1A6DFC51F109}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\assimp">
+      <UniqueIdentifier>{86A33041-647E-40DF-B3EA-5EFE862894A6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\A3-assignment.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="mgl\mglApp.cpp">
+      <Filter>mgl</Filter>
+    </ClCompile>
+    <ClCompile Include="mgl\mglCamera.cpp">
+      <Filter>mgl</Filter>
+    </ClCompile>
+    <ClCompile Include="mgl\mglError.cpp">
+      <Filter>mgl</Filter>
+    </ClCompile>
+    <ClCompile Include="mgl\mglMesh.cpp">
+      <Filter>mgl</Filter>
+    </ClCompile>
+    <ClCompile Include="mgl\mglShader.cpp">
+      <Filter>mgl</Filter>
+    </ClCompile>
+    <ClInclude Include="mgl\mgl.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglApp.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglCamera.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglConventions.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglError.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglGL.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglMesh.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglScenegraph.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <ClInclude Include="mgl\mglShader.hpp">
+      <Filter>mgl</Filter>
+    </ClInclude>
+    <None Include="src\pickagram-vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="src\pickagram-fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="assets\models\triangle.obj">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\models\square.obj">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\models\parallelogram.obj">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\models\table.obj">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\blender\make-pieces.py">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="README.md" />
+    <ClCompile Include="libraries\glew\src\glew.c">
+      <Filter>libraries\glew</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\context.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\init.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\input.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\monitor.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\platform.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\vulkan.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\window.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\egl_context.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\osmesa_context.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\null_init.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\null_monitor.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\null_window.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\null_joystick.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\win32_module.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\win32_time.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\win32_thread.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\win32_init.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\win32_joystick.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\win32_monitor.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\win32_window.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\glfw\src\wgl_context.c">
+      <Filter>libraries\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\AssetLib\Obj\ObjFileImporter.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\AssetLib\Obj\ObjFileMtlImporter.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\AssetLib\Obj\ObjFileParser.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\CApi\CInterfaceIOWrapper.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\AssertHandler.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\Base64.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\BaseImporter.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\BaseProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\Bitmap.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\CreateAnimMesh.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\DefaultIOStream.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\DefaultIOSystem.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\DefaultLogger.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\Exceptional.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\IOSystem.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\Importer.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\ImporterRegistry.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\PostStepRegistry.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\RemoveComments.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\SGSpatialSort.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\SceneCombiner.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\ScenePreprocessor.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\SkeletonMeshBuilder.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\SpatialSort.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\StandardShapes.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\Subdivision.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\TargetAnimation.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\Version.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\VertexTriangleAdjacency.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\material.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\scene.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Common\simd.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Geometry\GeometryUtils.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\Material\MaterialSystem.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\ArmaturePopulate.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\CalcTangentsProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\ComputeUVMappingProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\ConvertToLHProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\DeboneProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\DropFaceNormalsProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\EmbedTexturesProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\FindDegenerates.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\FindInstancesProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\FindInvalidDataProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\FixNormalsStep.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\GenBoundingBoxesProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\GenFaceNormalsProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\GenVertexNormalsProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\ImproveCacheLocality.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\JoinVerticesProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\LimitBoneWeightsProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\MakeVerboseFormat.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\OptimizeGraph.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\OptimizeMeshes.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\PretransformVertices.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\ProcessHelper.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\RemoveRedundantMaterials.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\RemoveVCProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\ScaleProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\SortByPTypeProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\SplitByBoneCountProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\SplitLargeMeshes.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\TextureTransform.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\TriangulateProcess.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\assimp\code\PostProcessing\ValidateDataStructure.cpp">
+      <Filter>libraries\assimp</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

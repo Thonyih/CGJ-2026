@@ -2,6 +2,25 @@
 
 What has been done, newest first.
 
+## 2026-11-23 - Assignment A3: 3D Pickagram (`assignments/A3-pickagram/`)
+- Built on the lecture's hello-3d-world (camera UBO) and mesh-loader (`mgl::Mesh` + Assimp). The teacher's `mgl` (04-mesh-loader version) is unchanged.
+- **Geometry:**
+  - 3 meshes (triangle, square, parallelogram) and a table, made in Blender by `assets/blender/make-pieces.py` and exported to OBJ.
+  - Each piece is the A2 shape (corner 0 at the origin) made 0.1 thick.
+  - A colour uniform per piece, and a different tint per face from the face normal.
+- **Scene graph:** `SceneNode` (mesh, shader, model matrix, children), with `world = parentWorld * local`. Root → Table → {TableTop, Pickagram → 7 pieces}. A left-mouse drag moves the table along the camera's right/front vectors.
+- **Animation:**
+  - Box configuration: the Tangram square lying flat (x-z plane). Shark: standing up (x-y plane).
+  - Holding the left/right arrows moves `Progress` between them (`glm::mix` for positions, `glm::slerp` for rotations). Releasing stops it halfway, and it can reverse.
+- **Cameras:**
+  - 2 orbit cameras with quaternion orientation (turned around their own axes, so no gimbal lock).
+  - Right-mouse orbit, scroll zoom, `C` switches camera (each keeps its state), `P` switches perspective/orthographic.
+  - The projection uses the window's aspect ratio, so there's no stretching.
+- **Assimp 5.4.3** is in `libraries/assimp`: only the core and the OBJ importer, compiled inside the project like GLEW/GLFW, with `config.h`/`revision.h` written by hand.
+- **Verified:**
+  - Debug and Release build with MSBuild (VS 2026).
+  - Tested in the running program: the shark at start, the arrow keys to the full box (a correct closed square) and back, stopping halfway, the table drag, orbit, camera switch, orthographic view, and wide/tall windows without stretching.
+
 ## 2026-11-20 - New course material: Lectures 5-6 and Assignment A3
 - Added to `Docs/`:
   - `Lectures/5-Viewing-Pipeline/`: handouts + `03-hello-3d-world` (3D, cameras: mgl now has `mglCamera`)
