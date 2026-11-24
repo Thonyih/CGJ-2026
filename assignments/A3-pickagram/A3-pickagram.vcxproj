@@ -129,7 +129,10 @@ xcopy /y /d /i "$(ProjectDir)assets\models\*.obj" "$(OutDir)..\assets\models\"</
   <ItemGroup>
     <None Include="src\pickagram-vs.glsl" />
     <None Include="src\pickagram-fs.glsl" />
-    <None Include="assets\models\triangle.obj" />
+    <None Include="assets\models\large.obj" />
+    <None Include="assets\models\medium.obj" />
+    <None Include="assets\models\small-center.obj" />
+    <None Include="assets\models\small-corner.obj" />
     <None Include="assets\models\square.obj" />
     <None Include="assets\models\parallelogram.obj" />
     <None Include="assets\models\table.obj" />

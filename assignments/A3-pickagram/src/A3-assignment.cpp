@@ -45,7 +45,8 @@
 
 const float SQRT2 = 1.41421356f;
 const float Q = SQRT2 / 4.0f;      // short side of a small triangle (as in A2)
-const float THICKNESS = 0.1f;      // thickness of every piece (as in make-pieces.py)
+const float PEAK = 27.5f / 89.0f;  // half the depth at the centre of the box:
+                                   // real Pickagram 55 mm for an 89 mm square
 const float ANIMATION_SPEED = 0.5f; // the full animation takes 1 / 0.5 = 2 seconds
 
 const std::string MODELS = "../assets/models/"; // relative to src\ (the working folder)
@@ -161,9 +162,13 @@ public:
 // 4. THE PIECES AND THEIR 2 CONFIGURATIONS
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Every piece is one of 3 meshes, made like the A2 shapes: the flat shape in
-// the x-y plane with corner 0 at (0, 0, 0), THICKNESS deep along z.
-// The base triangle is the large one, scaled for the medium and small ones.
+// The pieces follow the real Pickagram (see make-pieces.py): put together, the
+// 7 pieces make a 1 x 1 square that is a double pyramid - 13 mm thick at the
+// rim, 55 mm at the centre (for an 89 mm square). So each piece has its own
+// slopes, and there are 6 meshes (the 2 large triangles are the same shape).
+// Each mesh is made like the A2 shapes: the outline in the x-y plane with
+// corner 0 at (0, 0, 0), at its real size, with the depth along z centred
+// on z = 0. No scaling is needed.
 //
 // A configuration is written as in A2, in the flat 2D picture:
 //   x, y  = where corner 0 goes      angle = turn around corner 0 (degrees)
@@ -171,13 +176,16 @@ public:
 // SHARK: the A2 shark, standing up in the x-y plane on the table.
 // BOX:   the Tangram square (1 x 1, from Tangram-Stock-Sizing.jpeg), lying
 //        flat on the table: the 2D picture is turned -90 degrees around x,
-//        so the picture's y becomes -z and the thickness points up.
+//        so the picture's y becomes -z and the depth points up.
 
 const int NUMBER_OF_PIECES = 7;
+const int NUMBER_OF_MESHES = 6;
+const std::string MESH_FILE[NUMBER_OF_MESHES] = {
+    "large.obj", "small-center.obj", "small-corner.obj",
+    "square.obj", "parallelogram.obj", "medium.obj"};
 
-//                                  head    body   top fin lower fin square parallel. tail
-const int MESH[NUMBER_OF_PIECES] = {0,      0,     0,      0,        1,     2,        0}; // 0 triangle, 1 square, 2 parallelogram
-const float SIZE[NUMBER_OF_PIECES] = {1.0f, 1.0f,  0.5f,   0.5f,     1.0f,  1.0f,     SQRT2 / 2.0f};
+//                                  head  body  top fin  lower fin  square  parallel.  tail
+const int MESH[NUMBER_OF_PIECES] = {0,    0,    1,       2,         3,      4,         5};
 
 const float SHARK[NUMBER_OF_PIECES][3] = {
     // x                y           angle
@@ -188,6 +196,8 @@ const float SHARK[NUMBER_OF_PIECES][3] = {
     {2.0f * Q,          0.0f,      45.0f},   // body, square, green
     {2.0f * Q,          0.0f,      45.0f},   // tail stalk, parallelogram, orange
     {3.0f * Q + 0.5f,   Q,        135.0f}};  // tail, medium triangle, purple
+// The tail is placed as in A2 (Shark-Color.jpeg), our choice. The Pickagram
+// book (page 80) has it Q/2 higher, halfway up the parallelogram's edge.
 
 const float BOX[NUMBER_OF_PIECES][3] = {
     // x       y       angle
@@ -211,9 +221,11 @@ const glm::vec4 TABLE_COLOR(0.60f, 0.45f, 0.30f, 1.0f); // wood
 
 // Where each 2D picture is put on the table (the table top is at y = 0).
 // Shark: its lowest corner (the body's tip, y = -Q) touches the table, and it
-// is centred on the table's depth. Box: to the left of the shark.
-const glm::vec3 SHARK_OFFSET(1.2f, Q, -THICKNESS / 2.0f);
-const glm::vec3 BOX_OFFSET(-2.5f, 0.0f, 0.5f);
+// is centred on the table's depth (z = 0).
+// Box: to the left of the shark, resting on the peak of its back pyramid, so
+// it is lifted by PEAK.
+const glm::vec3 SHARK_OFFSET(1.2f, Q, 0.0f);
+const glm::vec3 BOX_OFFSET(-2.5f, PEAK, 0.5f);
 
 ///////////////////////////////////////////////////////////////////////////////
 // 5. MYAPP
@@ -232,7 +244,7 @@ private:
   const GLuint UBO_BP = 0; // binding point of the camera's uniform block
 
   // Meshes and shaders (as in the lecture's mesh-loader)
-  std::unique_ptr<mgl::Mesh> Meshes[3]; // 0 triangle, 1 square, 2 parallelogram
+  std::unique_ptr<mgl::Mesh> Meshes[NUMBER_OF_MESHES]; // in MESH_FILE order
   std::unique_ptr<mgl::Mesh> TableMesh;
   std::unique_ptr<mgl::ShaderProgram> Shaders;
 
@@ -277,9 +289,9 @@ std::unique_ptr<mgl::Mesh> MyApp::loadMesh(const std::string &file) {
 }
 
 void MyApp::createMeshes() {
-  Meshes[0] = loadMesh("triangle.obj");
-  Meshes[1] = loadMesh("square.obj");
-  Meshes[2] = loadMesh("parallelogram.obj");
+  for (int i = 0; i < NUMBER_OF_MESHES; i++) {
+    Meshes[i] = loadMesh(MESH_FILE[i]);
+  }
   TableMesh = loadMesh("table.obj");
 }
 
@@ -370,8 +382,7 @@ void MyApp::animate(GLFWwindow *win, float elapsed) {
     glm::quat turn = glm::slerp(BoxTurn[i], SharkTurn[i], Progress);
     glm::mat4 T = glm::translate(I, position);
     glm::mat4 R = glm::mat4_cast(turn);
-    glm::mat4 S = glm::scale(I, glm::vec3(SIZE[i], SIZE[i], 1.0f)); // thickness not scaled
-    Pieces[i].ModelMatrix = T * R * S;
+    Pieces[i].ModelMatrix = T * R; // no scale: each mesh is already its real size
   }
 }
 

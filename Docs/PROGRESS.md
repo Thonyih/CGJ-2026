@@ -5,12 +5,12 @@ What has been done, newest first.
 ## 2026-11-23 - Assignment A3: 3D Pickagram (`assignments/A3-pickagram/`)
 - Built on the lecture's hello-3d-world (camera UBO) and mesh-loader (`mgl::Mesh` + Assimp). The teacher's `mgl` (04-mesh-loader version) is unchanged.
 - **Geometry:**
-  - 3 meshes (triangle, square, parallelogram) and a table, made in Blender by `assets/blender/make-pieces.py` and exported to OBJ.
-  - Each piece is the A2 shape (corner 0 at the origin) made 0.1 thick.
+  - Real Pickagram shapes (`Docs/Assignments/A3/shark-pickagram-dimensions.md`): together the pieces form an 89 mm square that is a double pyramid, 13 mm at the rim and 55 mm at the centre (square = 1 here). The piece outlines already matched the file.
+  - 6 meshes (large, medium, small-center, small-corner, square, parallelogram) and a table, made in Blender by `assets/blender/make-pieces.py` and exported to OBJ. The 2 small triangles differ because they come from different parts of the pyramid. Each mesh has corner 0 at the origin and its real size, so there's no scaling.
   - A colour uniform per piece, and a different tint per face from the face normal.
 - **Scene graph:** `SceneNode` (mesh, shader, model matrix, children), with `world = parentWorld * local`. Root → Table → {TableTop, Pickagram → 7 pieces}. A left-mouse drag moves the table along the camera's right/front vectors.
 - **Animation:**
-  - Box configuration: the Tangram square lying flat (x-z plane). Shark: standing up (x-y plane).
+  - Box configuration: the Tangram square lying flat (x-z plane). Shark: standing up (x-y plane), in the A2 layout (`Shark-Color.jpeg`, our choice; the book's page 80 has the tail fin Q/2 higher).
   - Holding the left/right arrows moves `Progress` between them (`glm::mix` for positions, `glm::slerp` for rotations). Releasing stops it halfway, and it can reverse.
 - **Cameras:**
   - 2 orbit cameras with quaternion orientation (turned around their own axes, so no gimbal lock).

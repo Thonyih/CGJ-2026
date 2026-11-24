@@ -78,7 +78,16 @@
     <None Include="src\pickagram-fs.glsl">
       <Filter>shaders</Filter>
     </None>
-    <None Include="assets\models\triangle.obj">
+    <None Include="assets\models\large.obj">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\models\medium.obj">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\models\small-center.obj">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\models\small-corner.obj">
       <Filter>assets</Filter>
     </None>
     <None Include="assets\models\square.obj">
